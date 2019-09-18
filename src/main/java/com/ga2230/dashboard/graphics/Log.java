@@ -16,12 +16,13 @@ public class Log extends Panel {
 
     public Log() {
         textArea = new JTextArea();
-        scrollPane = new JScrollPane();
+        scrollPane = new JScrollPane(textArea);
         textArea.setEditable(false);
         textArea.setBackground(Color.BLACK);
         textArea.setForeground(Color.GREEN);
-//        scrollPane.add(textArea);
-        add(textArea);
+        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+//        scrollPane.setBackground(Color.ORANGE);
+        add(scrollPane);
         Communicator.pullListener.listen(thing -> textArea.setText(beautify(thing.toString())));
     }
 
@@ -41,6 +42,9 @@ public class Log extends Panel {
         textArea.setPreferredSize(dimension);
         textArea.setMinimumSize(dimension);
         textArea.setMaximumSize(dimension);
+        scrollPane.setPreferredSize(dimension);
+        scrollPane.setMinimumSize(dimension);
+        scrollPane.setMaximumSize(dimension);
         super.setSize(width, height);
     }
 }
