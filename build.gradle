@@ -34,5 +34,6 @@ dependencies {
     compile group: 'org.jsoup', name: 'jsoup', version: '1.12.1'
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.6.1'
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.6.1'
+    compile group: 'org.jfree', name: 'jfreechart', version: '1.5.0'
     compile fileTree(dir: 'libs', include: '*.jar')
 }

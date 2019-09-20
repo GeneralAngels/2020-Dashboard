@@ -47,7 +47,7 @@ public class Frame extends JFrame {
         analytics.setLayout(new BoxLayout(analytics, BoxLayout.Y_AXIS));
 //        loadStatus();
 //        loadCSV();
-//        loadGraph();
+        loadGraph();
         loadLog();
         analytics.setSize(WINDOW_WIDTH / 2, WINDOW_HEIGHT);
         panel.add(analytics);
@@ -67,13 +67,13 @@ public class Frame extends JFrame {
 
     private void loadGraph() {
         graph = new Graph();
-        graph.setSize(WINDOW_WIDTH / 2, WINDOW_HEIGHT);
+        graph.setSize(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 3);
         analytics.add(graph);
     }
 
     private void loadLog() {
         log = new Log();
-        log.setSize(WINDOW_WIDTH / 2, WINDOW_HEIGHT);
+        log.setSize(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 3);
         analytics.add(log);
     }
 

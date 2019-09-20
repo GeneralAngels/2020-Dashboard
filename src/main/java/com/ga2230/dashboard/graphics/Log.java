@@ -38,13 +38,11 @@ public class Log extends Panel {
 
     @Override
     public void setSize(int width, int height) {
-        Dimension dimension = new Dimension(width, height);
-        textArea.setPreferredSize(dimension);
-        textArea.setMinimumSize(dimension);
-        textArea.setMaximumSize(dimension);
-        scrollPane.setPreferredSize(dimension);
-        scrollPane.setMinimumSize(dimension);
-        scrollPane.setMaximumSize(dimension);
+        Dimension scrollDimension = new Dimension(width, height);
+        textArea.setMinimumSize(scrollDimension);
+        scrollPane.setPreferredSize(scrollDimension);
+        scrollPane.setMinimumSize(scrollDimension);
+        scrollPane.setMaximumSize(scrollDimension);
         super.setSize(width, height);
     }
 }

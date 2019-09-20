@@ -10,20 +10,25 @@ import org.json.JSONObject;
 
 public class Communicator {
     public static Broadcaster<JSONObject> pullListener;
+    public static Broadcaster<JSONObject> pushListener;
     private static NetworkTableInstance instance;
     private static NetworkTable database;
     private static NetworkTableEntry push, pull;
 
     static {
         pullListener = new Broadcaster<>();
+        pushListener = new Broadcaster<>();
         instance = NetworkTableInstance.getDefault();
         database = instance.getTable("database");
         instance.startClientTeam(2230);
         instance.startDSClient();
-//        this.push = this.database.getEntry("push");// Push to robot
+        push = database.getEntry("push");// Push to robot
         pull = database.getEntry("pull");// Pull from robot
         pull.addListener(entryNotification -> {
             pullListener.send(new JSONObject(entryNotification.value.getString()));
+        }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+        push.addListener(entryNotification -> {
+            pushListener.send(new JSONObject(entryNotification.value.getString()));
         }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
     }
 }
