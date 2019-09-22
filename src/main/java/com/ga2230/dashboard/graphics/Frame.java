@@ -46,7 +46,7 @@ public class Frame extends JFrame {
         analytics = new Panel();
         analytics.setLayout(new BoxLayout(analytics, BoxLayout.Y_AXIS));
 //        loadStatus();
-//        loadCSV();
+        loadCSV();
         loadGraph();
         loadLog();
         analytics.setSize(WINDOW_WIDTH / 2, WINDOW_HEIGHT);
@@ -61,7 +61,7 @@ public class Frame extends JFrame {
 
     private void loadCSV() {
         csv = new CSV();
-        csv.setSize(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 5);
+        csv.setSize(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 10);
         analytics.add(csv);
     }
 

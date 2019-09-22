@@ -20,17 +20,20 @@ public class Log extends Panel {
     public Log() {
         textArea = new JTextArea();
         scrollPane = new JScrollPane(textArea);
-        button = new JButton("Switch Source");
+        button = new JButton("Switch to Push");
         textArea.setEditable(false);
         textArea.setBackground(Color.BLACK);
         textArea.setForeground(Color.GREEN);
         scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        setBackground(Color.BLACK);
         add(button);
         add(scrollPane);
         button.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 pushListen = !pushListen;
+                textArea.setText("Waiting for data...");
+                button.setText(pushListen ? "Switch to Pull" : "Switch to Push");
             }
         });
         Communicator.pullListener.listen(thing -> {
@@ -38,7 +41,7 @@ public class Log extends Panel {
                 textArea.setText(beautify(thing.toString()));
             }
         });
-        Communicator.pushListener.listen(thing ->{
+        Communicator.pushListener.listen(thing -> {
             if (pushListen) {
                 textArea.setText(beautify(thing.toString()));
             }
@@ -57,11 +60,15 @@ public class Log extends Panel {
 
     @Override
     public void setSize(int width, int height) {
-        Dimension scrollDimension = new Dimension(width, height);
+        Dimension buttonDimension = new Dimension(width-6, height/8);
+        Dimension scrollDimension = new Dimension(width, height-buttonDimension.height);
         textArea.setMinimumSize(scrollDimension);
         scrollPane.setPreferredSize(scrollDimension);
         scrollPane.setMinimumSize(scrollDimension);
         scrollPane.setMaximumSize(scrollDimension);
+        button.setPreferredSize(buttonDimension);
+        button.setMinimumSize(buttonDimension);
+        button.setMaximumSize(buttonDimension);
         super.setSize(width, height);
     }
 }
