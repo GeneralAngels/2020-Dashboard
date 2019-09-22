@@ -50,9 +50,9 @@ public class Graph extends Panel {
 
     private JFreeChart createChart(XYDataset dataset) {
         JFreeChart chart = ChartFactory.createXYLineChart(
-                "Plot",
-                "Time",
-                "Value",
+                "",
+                "",
+                "",
                 dataset,
                 PlotOrientation.VERTICAL,
                 false,

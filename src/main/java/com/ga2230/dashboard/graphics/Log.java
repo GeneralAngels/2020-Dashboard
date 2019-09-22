@@ -7,23 +7,42 @@ import org.json.JSONObject;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.io.IOException;
 
 public class Log extends Panel {
 
     private JTextArea textArea;
     private JScrollPane scrollPane;
+    private JButton button;
+    private boolean pushListen = false;
 
     public Log() {
         textArea = new JTextArea();
         scrollPane = new JScrollPane(textArea);
+        button = new JButton("Switch Source");
         textArea.setEditable(false);
         textArea.setBackground(Color.BLACK);
         textArea.setForeground(Color.GREEN);
         scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-//        scrollPane.setBackground(Color.ORANGE);
+        add(button);
         add(scrollPane);
-        Communicator.pullListener.listen(thing -> textArea.setText(beautify(thing.toString())));
+        button.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                pushListen = !pushListen;
+            }
+        });
+        Communicator.pullListener.listen(thing -> {
+            if (!pushListen) {
+                textArea.setText(beautify(thing.toString()));
+            }
+        });
+        Communicator.pushListener.listen(thing ->{
+            if (pushListen) {
+                textArea.setText(beautify(thing.toString()));
+            }
+        });
     }
 
     private String beautify(String json) {
