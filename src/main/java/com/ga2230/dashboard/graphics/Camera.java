@@ -7,6 +7,7 @@ import com.teamdev.jxbrowser.engine.RenderingMode;
 import com.teamdev.jxbrowser.view.swing.BrowserView;
 
 import javax.swing.*;
+import java.awt.*;
 
 public class Camera extends Panel {
 
@@ -26,7 +27,9 @@ public class Camera extends Panel {
         navigation = new JPanel();
         previous = new JButton("◀");
         next = new JButton("▶");
-        navigation.setLayout(new BoxLayout(navigation, BoxLayout.X_AXIS));
+        previous.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, Frame.FONT_SIZE));
+        next.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, Frame.FONT_SIZE));
+        navigation.setLayout(new GridLayout(1, 2));
         navigation.add(previous);
         navigation.add(next);
         add(browserView);
@@ -38,5 +41,14 @@ public class Camera extends Panel {
         browser.mainFrame().ifPresent(frame ->
                 frame.loadHtml(html)
         );
+    }
+
+    @Override
+    public void setSize(int width, int height) {
+        Dimension dimension = new Dimension(width, height / 15);
+        navigation.setPreferredSize(dimension);
+        navigation.setMinimumSize(dimension);
+        navigation.setMaximumSize(dimension);
+        super.setSize(width, height);
     }
 }

@@ -60,8 +60,8 @@ public class Log extends Panel {
 
     @Override
     public void setSize(int width, int height) {
-        Dimension buttonDimension = new Dimension(width-6, height/8);
-        Dimension scrollDimension = new Dimension(width, height-buttonDimension.height);
+        Dimension buttonDimension = new Dimension(width - 6, height / 8);
+        Dimension scrollDimension = new Dimension(width, height - buttonDimension.height - 10);
         textArea.setMinimumSize(scrollDimension);
         scrollPane.setPreferredSize(scrollDimension);
         scrollPane.setMinimumSize(scrollDimension);

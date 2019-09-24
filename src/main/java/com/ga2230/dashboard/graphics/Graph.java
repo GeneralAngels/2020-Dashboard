@@ -2,6 +2,7 @@ package com.ga2230.dashboard.graphics;
 
 import com.ga2230.dashboard.communications.Broadcaster;
 import com.ga2230.dashboard.communications.Communicator;
+import com.ga2230.dashboard.util.ModuleHelper;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -27,16 +28,39 @@ public class Graph extends Panel {
     private JFreeChart chart;
     private ChartPanel chartPanel;
 
+    private JSONObject full = new JSONObject();
+    private String coordinates = "";
+
     public Graph() {
         XYDataset dataset = createDataset();
         chart = createChart(dataset);
         chartPanel = new ChartPanel(chart);
         chartPanel.setBackground(Color.white);
+        setBackground(Color.ORANGE);
         add(chartPanel);
         Communicator.pullListener.listen(thing -> {
-            series.add(time, thing.getJSONObject("modules").getJSONObject("robotcdrive").getInt("left_encoder"));
-            time++;
+            full.put("pull", thing);
+            update();
         });
+        Communicator.pushListener.listen(thing -> {
+            full.put("push", thing);
+            update();
+        });
+    }
+
+    private void update() {
+        Double value = ModuleHelper.getDouble(coordinates, full);
+        if (value != null)
+            addValue(value);
+        time++;
+    }
+
+    public void addValue(double value) {
+        series.add(time, value);
+    }
+
+    public void clearChart() {
+        series.clear();
     }
 
     private XYDataset createDataset() {
@@ -80,7 +104,7 @@ public class Graph extends Panel {
 
     @Override
     public void setSize(int width, int height) {
-        Dimension dimension = new Dimension(width, height);
+        Dimension dimension = new Dimension(width - 6, height - 10);
         chartPanel.setSize(dimension);
         chartPanel.setPreferredSize(dimension);
         chartPanel.setMinimumSize(dimension);

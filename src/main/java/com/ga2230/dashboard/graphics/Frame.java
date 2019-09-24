@@ -6,6 +6,7 @@ public class Frame extends JFrame {
 
     private static final int WINDOW_HEIGHT = 528;
     private static final int WINDOW_WIDTH = 1366;
+    static final int FONT_SIZE = 25;
 
     private JPanel panel;
 
@@ -45,35 +46,35 @@ public class Frame extends JFrame {
     private void loadAnalytics() {
         analytics = new Panel();
         analytics.setLayout(new BoxLayout(analytics, BoxLayout.Y_AXIS));
-//        loadStatus();
         loadCSV();
         loadGraph();
         loadLog();
+        loadStatus();
         analytics.setSize(WINDOW_WIDTH / 2, WINDOW_HEIGHT);
         panel.add(analytics);
     }
 
     private void loadStatus() {
         status = new Status();
-        status.setSize(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 5);
+//        status.setSize(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 16);
         analytics.add(status);
     }
 
     private void loadCSV() {
         csv = new CSV();
-        csv.setSize(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 10);
+        csv.setSize(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 15);
         analytics.add(csv);
     }
 
     private void loadGraph() {
         graph = new Graph();
-        graph.setSize(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 3);
+        graph.setSize(WINDOW_WIDTH / 2, (int) (WINDOW_HEIGHT / 1.9));
         analytics.add(graph);
     }
 
     private void loadLog() {
         log = new Log();
-        log.setSize(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 3);
+        log.setSize(WINDOW_WIDTH / 2, (int) (WINDOW_HEIGHT / 3));
         analytics.add(log);
     }
 
