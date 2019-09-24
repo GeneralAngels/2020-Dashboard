@@ -25,8 +25,8 @@ public class Camera extends Panel {
         browserView = BrowserView.newInstance(browser);
         // Navigation init
         navigation = new JPanel();
-        previous = new JButton("◀");
-        next = new JButton("▶");
+        previous = new JButton("<");
+        next = new JButton(">");
         previous.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, Frame.FONT_SIZE));
         next.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, Frame.FONT_SIZE));
         navigation.setLayout(new GridLayout(1, 2));

@@ -12,7 +12,7 @@ repositories {
 
 jar {
     manifest {
-        attributes("Manifest-Version": "1.0", "Main-Class": "Main");
+        attributes("Manifest-Version": "1.0", "Main-Class": "com.ga2230.dashboard.Main");
     }
 }
 

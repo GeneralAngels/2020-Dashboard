@@ -3,7 +3,6 @@ package com.ga2230.dashboard.graphics;
 import com.ga2230.dashboard.communications.Broadcaster;
 import com.ga2230.dashboard.communications.Communicator;
 import com.ga2230.dashboard.util.ModuleHelper;
-import org.json.JSONObject;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,13 +13,13 @@ public class Status extends Panel {
 
     public Status() {
         battery = new StatusField("\uD83D\uDD0B");
-        gear = new StatusField("⛭");
+        gear = new StatusField("\u2699");
         battery.setText("Unknown");
         gear.setText("Unknown");
         setLayout(new GridLayout(1, 2));
         add(battery);
         add(gear);
-//        Communicator.pushListener.listen(thing -> battery.setText(thing.getDouble("battery") + "%"));
+        Communicator.pushListener.listen(thing -> battery.setText(ModuleHelper.getDouble("battery", thing) + "%"));
         Communicator.pullListener.listen(thing -> gear.setText(ModuleHelper.getBoolean("modules->drive->values->gear", thing) ? "Power" : "Speed"));
     }
 
