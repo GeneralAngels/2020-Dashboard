@@ -114,7 +114,7 @@ public class Graph extends Panel {
 
         XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
         renderer.setSeriesPaint(0, Color.BLUE);
-        renderer.setSeriesStroke(0, new BasicStroke(1f));
+        renderer.setSeriesStroke(0, new BasicStroke(2f));
         renderer.setDefaultShapesVisible(false);
 
         plot.setRenderer(renderer);
