@@ -16,19 +16,24 @@ public class ModuleHelper {
         }
     }
 
-    public static Boolean getBoolean(String coordinates, JSONObject current) {
-        return (Boolean) get(coordinates, current, false);
+    public static boolean getBoolean(String coordinates, JSONObject current) {
+        return (boolean) get(coordinates, current, false);
     }
 
     public static String getString(String coordinates, JSONObject current) {
         return (String) get(coordinates, current, "");
     }
 
-    public static Integer getInt(String coordinates, JSONObject current) {
-        return (Integer) get(coordinates, current, 0);
+    public static int getInt(String coordinates, JSONObject current) {
+        return (int) get(coordinates, current, 0);
     }
 
-    public static Double getDouble(String coordinates, JSONObject current) {
-        return (Double) get(coordinates, current, 0.0);
+    public static double getDouble(String coordinates, JSONObject current) {
+        Object object = get(coordinates, current, 0.0);
+        if (object instanceof Double) {
+            return (double) object;
+        } else {
+            return (double) (Integer) object;
+        }
     }
 }

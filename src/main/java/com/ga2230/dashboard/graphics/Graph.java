@@ -17,7 +17,10 @@ import org.jfree.data.xy.XYSeriesCollection;
 import org.json.JSONObject;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 
 public class Graph extends Panel {
 
@@ -27,16 +30,40 @@ public class Graph extends Panel {
     private XYSeries series;
     private JFreeChart chart;
     private ChartPanel chartPanel;
+    private JTextField source;
 
     private JSONObject full = new JSONObject();
-    private String coordinates = "";
+    private String coordinates = "pull->values->time";
 
     public Graph() {
-        XYDataset dataset = createDataset();
-        chart = createChart(dataset);
+        source = new JTextField(coordinates);
+        source.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                coordinates = source.getText();
+                time=0;
+                clearChart();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                coordinates = source.getText();
+                time=0;
+                clearChart();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                coordinates = source.getText();
+                time=0;
+                clearChart();
+            }
+        });
+        chart = createChart(createDataset());
         chartPanel = new ChartPanel(chart);
         chartPanel.setBackground(Color.white);
         setBackground(Color.ORANGE);
+        add(source);
         add(chartPanel);
         Communicator.pullListener.listen(thing -> {
             full.put("pull", thing);
@@ -49,9 +76,8 @@ public class Graph extends Panel {
     }
 
     private void update() {
-        Double value = ModuleHelper.getDouble(coordinates, full);
-        if (value != null)
-            addValue(value);
+        double value = ModuleHelper.getDouble(coordinates, full);
+        addValue(value);
         time++;
     }
 
@@ -87,8 +113,9 @@ public class Graph extends Panel {
         XYPlot plot = chart.getXYPlot();
 
         XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
-        renderer.setSeriesPaint(0, Color.RED);
-        renderer.setSeriesStroke(0, new BasicStroke(2.0f));
+        renderer.setSeriesPaint(0, Color.BLUE);
+        renderer.setSeriesStroke(0, new BasicStroke(1f));
+        renderer.setDefaultShapesVisible(false);
 
         plot.setRenderer(renderer);
         plot.setBackgroundPaint(Color.white);
@@ -104,11 +131,15 @@ public class Graph extends Panel {
 
     @Override
     public void setSize(int width, int height) {
-        Dimension dimension = new Dimension(width - 6, height - 10);
+        Dimension sourceDimention = new Dimension(width - 6, height / 8);
+        Dimension dimension = new Dimension(width - 6, height - 14 - sourceDimention.height);
         chartPanel.setSize(dimension);
         chartPanel.setPreferredSize(dimension);
         chartPanel.setMinimumSize(dimension);
         chartPanel.setMaximumSize(dimension);
+        source.setPreferredSize(sourceDimention);
+        source.setMinimumSize(sourceDimention);
+        source.setMaximumSize(sourceDimention);
         super.setSize(width, height);
     }
 }
