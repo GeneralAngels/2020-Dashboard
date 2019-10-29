@@ -19,7 +19,8 @@ public class Frame extends JFrame {
 
     public Frame() {
         loadPanel();
-        loadCamera();
+        loadPlaceholder();
+//        loadCamera();
         loadAnalytics();
         loadFrame();
     }
@@ -35,6 +36,12 @@ public class Frame extends JFrame {
         panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
         setContentPane(panel);
+    }
+
+    private void loadPlaceholder(){
+        JPanel placeholder = new JPanel();
+        placeholder.setSize(WINDOW_WIDTH / 2, WINDOW_HEIGHT);
+        panel.add(placeholder);
     }
 
     private void loadCamera() {

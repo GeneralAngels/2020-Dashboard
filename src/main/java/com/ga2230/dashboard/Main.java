@@ -13,7 +13,7 @@ public class Main {
     }
 
     private static void loadLicense() {
-        System.setProperty("jxbrowser.license.key", "6P830J66YAA1OJQ0NORQ4PMBMFZBYBWPRVUU4LOR2HSOYEZDKNTFZUHUJ7WDHP007MJ0");
+        System.setProperty("jxbrowser.license.key", "1BNDHFSC1FTIQN062EJO3ZSIX528RTPMK6L9V7HHKN6KRWKQDLC7D9FP6NC2BWEP6QMTCU");
     }
 
     private static void loadTheme() {

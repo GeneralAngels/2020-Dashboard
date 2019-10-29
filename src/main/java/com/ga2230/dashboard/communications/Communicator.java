@@ -1,6 +1,8 @@
 package com.ga2230.dashboard.communications;
 
-import edu.wpi.first.networktables.*;
+import com.ga2230.networking.Dialog;
+import com.ga2230.networking.OnConnect;
+import com.ga2230.networking.OnReceive;
 import org.json.JSONObject;
 
 /**
@@ -11,24 +13,45 @@ import org.json.JSONObject;
 public class Communicator {
     public static Broadcaster<JSONObject> pullListener;
     public static Broadcaster<JSONObject> pushListener;
-    private static NetworkTableInstance instance;
-    private static NetworkTable database;
-    private static NetworkTableEntry push, pull;
 
     static {
         pullListener = new Broadcaster<>();
         pushListener = new Broadcaster<>();
-        instance = NetworkTableInstance.getDefault();
-        database = instance.getTable("database");
-        instance.startClientTeam(2230);
-        instance.startDSClient();
-        push = database.getEntry("push");// Push to robot
-        pull = database.getEntry("pull");// Pull from robot
-        pull.addListener(entryNotification -> {
-            pullListener.send(new JSONObject(entryNotification.value.getString()));
-        }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
-        push.addListener(entryNotification -> {
-            pushListener.send(new JSONObject(entryNotification.value.getString()));
-        }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+        new Thread(() -> {
+            connectToPull();
+            connectToPush();
+        }).start();
+    }
+
+    private static void connectToPull() {
+        Dialog.connect("10.22.30.2", (s, dialog) -> {
+            if (s.length() > 0)
+                pullListener.send(new JSONObject(s));
+        }, new OnConnect() {
+            @Override
+            public void onConnect(Dialog dialog) {
+
+            }
+
+            @Override
+            public void onDisonnect(Dialog dialog) {
+            }
+        });
+    }
+
+    private static void connectToPush() {
+        Dialog.connect("10.22.30.3", (s, dialog) -> {
+            if (s.length() > 0)
+                pushListener.send(new JSONObject(s));
+        }, new OnConnect() {
+            @Override
+            public void onConnect(Dialog dialog) {
+
+            }
+
+            @Override
+            public void onDisonnect(Dialog dialog) {
+            }
+        });
     }
 }
