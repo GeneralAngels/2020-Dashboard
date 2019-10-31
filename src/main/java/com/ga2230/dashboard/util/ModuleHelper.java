@@ -17,23 +17,39 @@ public class ModuleHelper {
     }
 
     public static boolean getBoolean(String coordinates, JSONObject current) {
-        return (boolean) get(coordinates, current, false);
+        try {
+            return (boolean) get(coordinates, current, false);
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public static String getString(String coordinates, JSONObject current) {
-        return (String) get(coordinates, current, "");
+        try {
+            return (String) get(coordinates, current, "");
+        } catch (Exception e) {
+            return "";
+        }
     }
 
     public static int getInt(String coordinates, JSONObject current) {
-        return (int) get(coordinates, current, 0);
+        try {
+            return (int) get(coordinates, current, 0);
+        } catch (Exception e) {
+            return 0;
+        }
     }
 
     public static double getDouble(String coordinates, JSONObject current) {
-        Object object = get(coordinates, current, 0.0);
-        if (object instanceof Double) {
-            return (double) object;
-        } else {
-            return (double) (Integer) object;
+        try {
+            Object object = get(coordinates, current, 0.0);
+            if (object instanceof Double) {
+                return (double) object;
+            } else {
+                return (double) (Integer) object;
+            }
+        } catch (Exception e) {
+            return 0;
         }
     }
 }

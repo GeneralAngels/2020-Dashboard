@@ -1,16 +1,13 @@
 package com.ga2230.dashboard.graphics;
 
-import com.ga2230.dashboard.communications.Broadcaster;
 import com.ga2230.dashboard.communications.Communicator;
 import com.ga2230.dashboard.util.ModuleHelper;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.block.BlockBorder;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
-import org.jfree.chart.title.TextTitle;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
@@ -20,50 +17,69 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 
 public class Graph extends Panel {
-
-    private double time = 0.0;
 
     private XYDataset dataset;
     private XYSeries series;
     private JFreeChart chart;
     private ChartPanel chartPanel;
-    private JTextField source;
+    private JPanel sourcePanel;
+    private JTextField ySource, xSource;
 
     private JSONObject full = new JSONObject();
-    private String coordinates = "pull->values->time";
+    private String yCoordinates = "pull->zero";
+    private String xCoordinates = "pull->time";
 
     public Graph() {
-        source = new JTextField(coordinates);
-        source.getDocument().addDocumentListener(new DocumentListener() {
+        ySource = new JTextField(yCoordinates);
+        xSource = new JTextField(xCoordinates);
+        ySource.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
-                coordinates = source.getText();
-                time=0;
+                yCoordinates = ySource.getText();
                 clearChart();
             }
 
             @Override
             public void removeUpdate(DocumentEvent e) {
-                coordinates = source.getText();
-                time=0;
+                yCoordinates = ySource.getText();
                 clearChart();
             }
 
             @Override
             public void changedUpdate(DocumentEvent e) {
-                coordinates = source.getText();
-                time=0;
+                yCoordinates = ySource.getText();
+                clearChart();
+            }
+        });
+        xSource.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                xCoordinates = xSource.getText();
+                clearChart();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                xCoordinates = xSource.getText();
+                clearChart();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                xCoordinates = xSource.getText();
                 clearChart();
             }
         });
         chart = createChart(createDataset());
         chartPanel = new ChartPanel(chart);
         chartPanel.setBackground(Color.white);
+        sourcePanel = new JPanel(new GridLayout(1, 2));
         setBackground(Color.ORANGE);
-        add(source);
+        sourcePanel.add(ySource);
+        sourcePanel.add(xSource);
+        add(sourcePanel);
         add(chartPanel);
         Communicator.pullListener.listen(thing -> {
             full.put("pull", thing);
@@ -76,13 +92,7 @@ public class Graph extends Panel {
     }
 
     private void update() {
-        double value = ModuleHelper.getDouble(coordinates, full);
-        addValue(value);
-        time++;
-    }
-
-    public void addValue(double value) {
-        series.add(time, value);
+        series.add(ModuleHelper.getDouble(xCoordinates, full), ModuleHelper.getDouble(yCoordinates, full));
     }
 
     public void clearChart() {
@@ -137,9 +147,9 @@ public class Graph extends Panel {
         chartPanel.setPreferredSize(dimension);
         chartPanel.setMinimumSize(dimension);
         chartPanel.setMaximumSize(dimension);
-        source.setPreferredSize(sourceDimention);
-        source.setMinimumSize(sourceDimention);
-        source.setMaximumSize(sourceDimention);
+        sourcePanel.setPreferredSize(sourceDimention);
+        sourcePanel.setMinimumSize(sourceDimention);
+        sourcePanel.setMaximumSize(sourceDimention);
         super.setSize(width, height);
     }
 }
