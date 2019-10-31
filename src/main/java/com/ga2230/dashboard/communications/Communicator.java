@@ -44,14 +44,12 @@ public class Communicator {
             public void onDisonnect(Dialog given) {
                 try {
                     Thread.sleep(1000);
-                    dialog = Dialog.connect("10.22.30.2", onReceive, this);
-                    System.out.println("Reconnect");
+                    dialog = Dialog.connect("10.22.30.2", onReceive, onConnect);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
         };
         onConnect.onDisonnect(null);
-
     }
 }
