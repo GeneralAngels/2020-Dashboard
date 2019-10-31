@@ -41,33 +41,17 @@ public class Communicator {
             }
 
             @Override
-            public void onDisonnect(Dialog dialog) {
-                new Thread(() -> {
-                    try {
-                        Communicator.dialog = Dialog.connect("10.22.30.2", onReceive, Communicator.onConnect);
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }).start();
+            public void onDisonnect(Dialog given) {
+                try {
+                    Thread.sleep(1000);
+                    dialog = Dialog.connect("10.22.30.2", onReceive, this);
+                    System.out.println("Reconnect");
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         };
         onConnect.onDisonnect(null);
 
-    }
-
-    private static void connectToPull() {
-        Dialog.connect("10.22.30.2", (s, dialog) -> {
-
-        }, new OnConnect() {
-            @Override
-            public void onConnect(Dialog dialog) {
-            }
-
-            @Override
-            public void onDisonnect(Dialog dialog) {
-
-            }
-        });
     }
 }
