@@ -11,7 +11,6 @@ public class Frame extends JFrame {
     private JPanel panel;
 
     private Panel analytics;
-    private Camera camera;
     private Status status;
     private Graph graph;
     private CSV csv;
@@ -42,12 +41,6 @@ public class Frame extends JFrame {
         JPanel placeholder = new JPanel();
         placeholder.setSize(WINDOW_WIDTH / 2, WINDOW_HEIGHT);
         panel.add(placeholder);
-    }
-
-    private void loadCamera() {
-        camera = new Camera("");
-        camera.setSize(WINDOW_WIDTH / 2, WINDOW_HEIGHT);
-        panel.add(camera);
     }
 
     private void loadAnalytics() {
