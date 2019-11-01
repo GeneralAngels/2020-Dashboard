@@ -15,8 +15,13 @@ public class Communicator {
     public static Broadcaster<JSONObject> pullListener;
     public static Broadcaster<JSONObject> pushListener;
     private static Dialog dialog = null;
-    private static OnConnect onConnect = null;
-    private static OnReceive onReceive = null;
+    private static OnReceive onReceive = new OnReceive() {
+        @Override
+        public void receive(String s, Dialog dialog) {
+            if (s.length() > 0)
+                pullListener.send(new JSONObject(s));
+        }
+    };
 
     static {
         pullListener = new Broadcaster<>();
@@ -27,29 +32,14 @@ public class Communicator {
                 pushListener.send(new JSONObject(s));
             }
         });
-        onReceive = new OnReceive() {
-            @Override
-            public void receive(String s, Dialog dialog) {
-                if (s.length() > 0)
-                    pullListener.send(new JSONObject(s));
-            }
-        };
-        onConnect = new OnConnect() {
-            @Override
-            public void onConnect(Dialog dialog) {
+        reconnect();
+    }
 
-            }
-
-            @Override
-            public void onDisonnect(Dialog given) {
-                try {
-                    Thread.sleep(1000);
-                    dialog = Dialog.connect("10.22.30.2", onReceive, onConnect);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        };
-        onConnect.onDisonnect(null);
+    public static void reconnect() {
+        if (dialog == null || !dialog.isRunning()) {
+            if (dialog != null)
+                dialog.kill();
+            dialog = Dialog.connect("10.22.30.2", onReceive, null);
+        }
     }
 }

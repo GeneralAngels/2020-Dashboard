@@ -1,39 +1,44 @@
 package com.ga2230.dashboard.graphics;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ga2230.dashboard.communications.Broadcaster;
 import com.ga2230.dashboard.communications.Communicator;
-import org.json.JSONObject;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.io.IOException;
 
 public class Log extends Panel {
 
     private JTextArea textArea;
     private JScrollPane scrollPane;
-    private JButton button;
+    private JButton switchButton, reconnectButton;
     private boolean pushListen = false;
 
     public Log() {
         textArea = new JTextArea();
         scrollPane = new JScrollPane(textArea);
-        button = new JButton("Switch to Push");
+        switchButton = new JButton("Switch to Push");
+        reconnectButton = new JButton("Reconnect");
         textArea.setEditable(false);
         textArea.setBackground(Color.BLACK);
         textArea.setForeground(Color.GREEN);
         scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         setBackground(Color.BLACK);
-        add(button);
+        add(reconnectButton);
+        add(switchButton);
         add(scrollPane);
-        button.addActionListener(new AbstractAction() {
+        switchButton.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 pushListen = !pushListen;
                 textArea.setText("Waiting for data...");
-                button.setText(pushListen ? "Switch to Pull" : "Switch to Push");
+                switchButton.setText(pushListen ? "Switch to Pull" : "Switch to Push");
+            }
+        });
+        reconnectButton.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Communicator.reconnect();
             }
         });
         Communicator.pullListener.listen(thing -> {
@@ -61,14 +66,17 @@ public class Log extends Panel {
     @Override
     public void setSize(int width, int height) {
         Dimension buttonDimension = new Dimension(width - 6, height / 8);
-        Dimension scrollDimension = new Dimension(width, height - buttonDimension.height - 10);
+        Dimension scrollDimension = new Dimension(width, height - buttonDimension.height * 2 - 14);
         textArea.setMinimumSize(scrollDimension);
         scrollPane.setPreferredSize(scrollDimension);
         scrollPane.setMinimumSize(scrollDimension);
         scrollPane.setMaximumSize(scrollDimension);
-        button.setPreferredSize(buttonDimension);
-        button.setMinimumSize(buttonDimension);
-        button.setMaximumSize(buttonDimension);
+        switchButton.setPreferredSize(buttonDimension);
+        switchButton.setMinimumSize(buttonDimension);
+        switchButton.setMaximumSize(buttonDimension);
+        reconnectButton.setPreferredSize(buttonDimension);
+        reconnectButton.setMinimumSize(buttonDimension);
+        reconnectButton.setMaximumSize(buttonDimension);
         super.setSize(width, height);
     }
 }
