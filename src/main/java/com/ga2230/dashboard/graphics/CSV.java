@@ -16,7 +16,9 @@ import java.util.Date;
 
 public class CSV extends Panel {
 
-    private JButton save, saveAndOpen, clear, bookmark;
+    boolean record = false;
+
+    private JButton toggle, save, saveAndOpen, clear, bookmark;
 
     private ArrayList<String> titles = new ArrayList<>();
     private ArrayList<ArrayList<String>> log = new ArrayList<>();
@@ -24,6 +26,7 @@ public class CSV extends Panel {
     private JSONObject full = new JSONObject();
 
     public CSV() {
+        toggle = new JButton("Record");
         save = new JButton("Save");
         saveAndOpen = new JButton("Save and Open");
         clear = new JButton("Clear");
@@ -59,6 +62,18 @@ public class CSV extends Panel {
                 log.clear();
             }
         });
+        toggle.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (record) {
+                    toggle.setText("Record");
+                } else {
+                    toggle.setText("Don't Record");
+                }
+                record = !record;
+            }
+        });
+        add(toggle);
         add(save);
         add(saveAndOpen);
         add(bookmark);
@@ -75,8 +90,10 @@ public class CSV extends Panel {
     }
 
     private void update() {
-        titles = flatten(full, true);
-        log.add(flatten(full, false));
+        if (record) {
+            titles = flatten(full, true);
+            log.add(flatten(full, false));
+        }
     }
 
     private File save() {

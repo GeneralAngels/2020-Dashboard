@@ -12,9 +12,11 @@ public class Log extends Panel {
     private JTextArea textArea;
     private JScrollPane scrollPane;
     private JButton switchButton, reconnectButton;
+    private JPanel buttons;
     private boolean pushListen = false;
 
     public Log() {
+        buttons = new JPanel();
         textArea = new JTextArea();
         scrollPane = new JScrollPane(textArea);
         switchButton = new JButton("Switch to Push");
@@ -24,8 +26,10 @@ public class Log extends Panel {
         textArea.setForeground(Color.GREEN);
         scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         setBackground(Color.BLACK);
-        add(reconnectButton);
-        add(switchButton);
+        buttons.setLayout(new GridLayout(1, 2));
+        buttons.add(reconnectButton);
+        buttons.add(switchButton);
+        add(buttons);
         add(scrollPane);
         switchButton.addActionListener(new AbstractAction() {
             @Override
@@ -66,17 +70,14 @@ public class Log extends Panel {
     @Override
     public void setSize(int width, int height) {
         Dimension buttonDimension = new Dimension(width - 6, height / 8);
-        Dimension scrollDimension = new Dimension(width, height - buttonDimension.height * 2 - 14);
+        Dimension scrollDimension = new Dimension(width, height - buttonDimension.height - 14);
         textArea.setMinimumSize(scrollDimension);
         scrollPane.setPreferredSize(scrollDimension);
         scrollPane.setMinimumSize(scrollDimension);
         scrollPane.setMaximumSize(scrollDimension);
-        switchButton.setPreferredSize(buttonDimension);
-        switchButton.setMinimumSize(buttonDimension);
-        switchButton.setMaximumSize(buttonDimension);
-        reconnectButton.setPreferredSize(buttonDimension);
-        reconnectButton.setMinimumSize(buttonDimension);
-        reconnectButton.setMaximumSize(buttonDimension);
+        buttons.setPreferredSize(buttonDimension);
+        buttons.setMinimumSize(buttonDimension);
+        buttons.setMaximumSize(buttonDimension);
         super.setSize(width, height);
     }
 }

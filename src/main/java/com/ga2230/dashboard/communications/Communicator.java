@@ -26,13 +26,18 @@ public class Communicator {
     static {
         pullListener = new Broadcaster<>();
         pushListener = new Broadcaster<>();
-        Server.begin(new OnReceive() {
+        new Thread(new Runnable() {
             @Override
-            public void receive(String s, Dialog dialog) {
-                pushListener.send(new JSONObject(s));
+            public void run() {
+                Server.begin(new OnReceive() {
+                    @Override
+                    public void receive(String s, Dialog dialog) {
+                        pushListener.send(new JSONObject(s));
+                    }
+                });
+                reconnect();
             }
-        });
-        reconnect();
+        }).start();
     }
 
     public static void reconnect() {
