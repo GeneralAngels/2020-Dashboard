@@ -1,10 +1,9 @@
 package com.ga2230.dashboard.communications;
 
-import com.ga2230.networking.Server;
-import org.json.JSONObject;
-
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -15,25 +14,15 @@ import java.util.TimerTask;
 
 public class Communicator {
 
-    private static BufferedWriter writer;
-    private static BufferedReader reader;
-    private static Socket socket;
+    public static ArrayList<Topic> topics = new ArrayList<>();
 
-    public static Topic topicA = new Topic(), topicB = new Topic(), topicC = new Topic(), topicD = new Topic();
-
-    static {
-        try {
-            socket = new Socket("10.22.30.2", 2230);
-            writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-            reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            new Timer().scheduleAtFixedRate(new TimerTask() {
-                @Override
-                public void run() {
-
-                }
-            }, 0, 1000);
-        } catch (IOException e) {
-            e.printStackTrace();
+    public static void reconnect() {
+        for (Topic topic : topics) {
+            try {
+                topic.reconnect();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -41,6 +30,13 @@ public class Communicator {
 
         private String command = "master json";
         private Broadcast<String> broadcast = new Broadcast<>();
+
+        private BufferedWriter writer;
+        private BufferedReader reader;
+        private Socket socket;
+
+        private boolean connected = false;
+        private boolean loop = true;
 
         public Broadcast<String> getBroadcast() {
             return broadcast;
@@ -50,22 +46,63 @@ public class Communicator {
             this.command = command;
         }
 
-        public void begin(int refreshRate) {
-            new Timer().scheduleAtFixedRate(new TimerTask() {
-                @Override
-                public void run() {
-                    try {
-                        writer.write(command + "\n");
+        public void reconnect() throws IOException {
+            connected = false;
+            if (reader != null && writer != null && socket != null) {
+                reader.close();
+                writer.close();
+                socket.close();
+            }
+            socket = new Socket("10.22.30.2", 2230);
+            writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+            reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            connected = true;
+        }
+
+        private void loop() throws IOException {
+            try {
+                if (connected) {
+                    if (loop) {
+                        writer.write(command);
+                        writer.newLine();
                         writer.flush();
-                        Thread.sleep(10);
-                        broadcast.send(reader.readLine());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                    } else {
+                        String result = reader.readLine();
+                        if (result != null)
+                            broadcast.send(result);
                     }
+                    loop = !loop;
                 }
-            }, 0, 1000 / refreshRate);
+            } catch (SocketException e) {
+                reconnect();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        public void begin(int refreshRate){
+            if (!topics.contains(this))
+                topics.add(this);
+            try {
+                reconnect();
+                new Timer().scheduleAtFixedRate(new TimerTask() {
+                    @Override
+                    public void run() {
+                        try {
+                            loop();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, 0, 1000 / refreshRate);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        public void stop() {
+            if (topics.contains(this))
+                topics.remove(this);
         }
     }
 

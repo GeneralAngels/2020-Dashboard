@@ -1,5 +1,6 @@
 package com.ga2230.dashboard.graphics;
 
+import com.ga2230.dashboard.communications.Broadcast;
 import com.ga2230.dashboard.communications.Communicator;
 import com.ga2230.dashboard.util.ModuleHelper;
 import org.jfree.chart.ChartFactory;
@@ -27,19 +28,17 @@ public class Graph extends Panel {
     private ChartPanel chartPanel;
     private JPanel uiPanel;
     private JButton addPoint, clearAll;
-    private JTextField realtimeX, realtimeY, pointX, pointY;
+    private JTextField realtimeX, realtimeY;
 
-    private JSONObject full = new JSONObject();
-    private String xCoordinates = "pull->graphX";
-    private String yCoordinates = "pull->graphY";
-    private String xPoint = "pull->pointX";
-    private String yPoint = "pull->pointY";
+    private Communicator.Topic xTopic, yTopic;
+
+    private String xCoordinates = "master>time";
+    private String yCoordinates = "master>time";
+    private String lastX, lastY;
 
     public Graph() {
         realtimeY = new JTextField(yCoordinates);
         realtimeX = new JTextField(xCoordinates);
-        pointX = new JTextField(xPoint);
-        pointY = new JTextField(yPoint);
         addPoint = new JButton("Add Point");
         clearAll = new JButton("Clear All");
         realtimeY.getDocument().addDocumentListener(new DocumentListener() {
@@ -80,44 +79,6 @@ public class Graph extends Panel {
                 clearChart();
             }
         });
-        pointY.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                yPoint = pointY.getText();
-                clearPoint();
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                yPoint = pointY.getText();
-                clearPoint();
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                yPoint = pointY.getText();
-                clearChart();
-            }
-        });
-        pointX.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                xPoint = pointX.getText();
-                clearPoint();
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                xPoint = pointX.getText();
-                clearPoint();
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                xPoint = pointX.getText();
-                clearChart();
-            }
-        });
         clearAll.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -152,40 +113,55 @@ public class Graph extends Panel {
         chart = createChart(createDataset());
         chartPanel = new ChartPanel(chart);
         chartPanel.setBackground(Color.white);
-        uiPanel = new JPanel(new GridLayout(3, 2));
+        uiPanel = new JPanel(new GridLayout(2, 2));
         setBackground(Color.ORANGE);
         uiPanel.add(realtimeX);
         uiPanel.add(realtimeY);
-        uiPanel.add(pointX);
-        uiPanel.add(pointY);
         uiPanel.add(addPoint);
         uiPanel.add(clearAll);
         add(uiPanel);
         add(chartPanel);
-        Communicator.pullListener.listen(thing -> {
-            full.put("pull", thing);
-            update();
+        xTopic = new Communicator.Topic();
+        xTopic.getBroadcast().listen(thing -> {
+            lastX = thing;
+            Graph.this.update();
         });
-        Communicator.pushListener.listen(thing -> {
-            full.put("push", thing);
-            update();
+        xTopic.begin(5);
+        yTopic = new Communicator.Topic();
+        yTopic.getBroadcast().listen(thing -> {
+            lastY = thing;
+            Graph.this.update();
         });
+        yTopic.begin(5);
     }
 
     private void update() {
-        logSeries.add(ModuleHelper.getDouble(xCoordinates, full), ModuleHelper.getDouble(yCoordinates, full));
+        try {
+            if (lastX != null &&
+                    lastY != null) {
+                JSONObject x = new JSONObject(lastX);
+                JSONObject y = new JSONObject(lastY);
+                String[] xKeys = xCoordinates.split(">");
+                String[] yKeys = yCoordinates.split(">");
+                if (xKeys.length > 1 &&
+                        yKeys.length > 1) {
+                    if (x.has(xKeys[1]) &&
+                            y.has(yKeys[1])) {
+                        logSeries.add(x.getDouble(xKeys[1]), y.getDouble(yKeys[1]));
+                    }
+                }
+            }
+        } catch (Exception ignored) {
+        }
     }
 
     public void clearChart() {
+        xTopic.setCommand(xCoordinates.split(">")[0] + " json");
+        yTopic.setCommand(yCoordinates.split(">")[0] + " json");
         logSeries.clear();
     }
 
-    public void clearPoint() {
-        pointSeries.clear();
-        pointSeries.add(ModuleHelper.getDouble(xPoint, full), ModuleHelper.getDouble(yPoint, full));
-    }
-
-    public void clearAll(){
+    public void clearAll() {
         logSeries.clear();
         pointSeries.clear();
         userSeries.clear();
@@ -248,7 +224,7 @@ public class Graph extends Panel {
 
     @Override
     public void setSize(int width, int height) {
-        Dimension sourceDimention = new Dimension(width - 6, height / 4);
+        Dimension sourceDimention = new Dimension(width - 6, height / 5);
         Dimension dimension = new Dimension(width - 6, height - 14 - sourceDimention.height);
         chartPanel.setSize(dimension);
         chartPanel.setPreferredSize(dimension);

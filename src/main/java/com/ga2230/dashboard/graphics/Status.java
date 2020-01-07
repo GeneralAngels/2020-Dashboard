@@ -18,8 +18,6 @@ public class Status extends Panel {
         setLayout(new GridLayout(1, 2));
         add(battery);
         add(gear);
-        Communicator.pushListener.listen(thing -> battery.setText(ModuleHelper.getDouble("battery", thing) + "%"));
-        Communicator.pullListener.listen(thing -> gear.setText(ModuleHelper.getBoolean("modules->drive->values->gear", thing) ? "Power" : "Speed"));
     }
 
     private class StatusField extends JLabel {

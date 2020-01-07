@@ -79,14 +79,6 @@ public class CSV extends Panel {
         add(bookmark);
         add(clear);
         setLayout(new GridLayout(1, 4));
-        Communicator.pullListener.listen(thing -> {
-            full.put("pull", thing);
-            update();
-        });
-        Communicator.pushListener.listen(thing -> {
-            full.put("push", thing);
-            update();
-        });
     }
 
     private void update() {

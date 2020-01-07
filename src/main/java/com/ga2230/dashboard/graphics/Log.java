@@ -6,6 +6,7 @@ import com.ga2230.dashboard.communications.Communicator;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.io.IOException;
 
 public class Log extends Panel {
 
@@ -43,16 +44,6 @@ public class Log extends Panel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 Communicator.reconnect();
-            }
-        });
-        Communicator.pullListener.listen(thing -> {
-            if (!pushListen) {
-                textArea.setText(beautify(thing.toString()));
-            }
-        });
-        Communicator.pushListener.listen(thing -> {
-            if (pushListen) {
-                textArea.setText(beautify(thing.toString()));
             }
         });
     }
