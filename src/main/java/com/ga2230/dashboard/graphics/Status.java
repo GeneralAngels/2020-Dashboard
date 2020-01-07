@@ -1,6 +1,5 @@
 package com.ga2230.dashboard.graphics;
 
-import com.ga2230.dashboard.communications.Broadcaster;
 import com.ga2230.dashboard.communications.Communicator;
 import com.ga2230.dashboard.util.ModuleHelper;
 

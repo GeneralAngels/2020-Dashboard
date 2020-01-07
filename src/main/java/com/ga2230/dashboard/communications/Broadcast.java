@@ -2,7 +2,7 @@ package com.ga2230.dashboard.communications;
 
 import java.util.ArrayList;
 
-public class Broadcaster<T> {
+public class Broadcast<T> {
     private ArrayList<T> history = new ArrayList<>();
     private ArrayList<Listener<T>> listeners = new ArrayList<>();
 
