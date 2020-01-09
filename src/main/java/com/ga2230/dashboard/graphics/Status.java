@@ -1,23 +1,20 @@
 package com.ga2230.dashboard.graphics;
 
-import com.ga2230.dashboard.communications.Communicator;
-import com.ga2230.dashboard.util.ModuleHelper;
-
 import javax.swing.*;
 import java.awt.*;
 
 public class Status extends Panel {
 
-    private StatusField battery, gear;
+    private StatusField laptopBattery, robotBattery;
 
     public Status() {
-        battery = new StatusField("\uD83D\uDD0B");
-        gear = new StatusField("\u2699");
-        battery.setText("Unknown");
-        gear.setText("Unknown");
+        laptopBattery = new StatusField("\uD83D\uDD0B");
+        robotBattery = new StatusField("\uD83D\uDD0B");
+        laptopBattery.setText("-1%");
+        robotBattery.setText("-1%");
         setLayout(new GridLayout(1, 2));
-        add(battery);
-        add(gear);
+        add(laptopBattery);
+        add(robotBattery);
     }
 
     private class StatusField extends JLabel {

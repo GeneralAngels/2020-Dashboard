@@ -1,6 +1,7 @@
 package com.ga2230.dashboard.graphics;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ga2230.dashboard.communications.Broadcast;
 import com.ga2230.dashboard.communications.Communicator;
 
 import javax.swing.*;
@@ -46,6 +47,15 @@ public class Log extends Panel {
                 Communicator.reconnect();
             }
         });
+        Communicator.Topic woahTelemetry = new Communicator.Topic();
+        woahTelemetry.setCommand("master telemetry");
+        woahTelemetry.getBroadcast().listen(new Broadcast.Listener<String>() {
+            @Override
+            public void update(String thing) {
+                textArea.setText(beautify(thing));
+            }
+        });
+        woahTelemetry.begin(5);
     }
 
     private String beautify(String json) {
