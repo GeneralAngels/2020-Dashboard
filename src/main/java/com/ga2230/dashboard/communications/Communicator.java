@@ -80,7 +80,7 @@ public class Communicator {
             }
         }
 
-        public void begin(int refreshRate){
+        public void begin(double refreshRate) {
             if (!topics.contains(this))
                 topics.add(this);
             try {
@@ -94,7 +94,7 @@ public class Communicator {
                             e.printStackTrace();
                         }
                     }
-                }, 0, 1000 / refreshRate);
+                }, 0, (long) (1000.0 / refreshRate));
             } catch (IOException e) {
                 e.printStackTrace();
             }
