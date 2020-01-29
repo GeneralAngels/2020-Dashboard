@@ -1,5 +1,7 @@
 package com.ga2230.dashboard.graphics;
 
+import com.ga2230.dashboard.communications.Communicator;
+
 import javax.swing.*;
 
 public class Frame extends JFrame {
@@ -7,6 +9,8 @@ public class Frame extends JFrame {
     private static final int WINDOW_HEIGHT = 528;
     private static final int WINDOW_WIDTH = 1366;
     static final int FONT_SIZE = 25;
+
+    private static boolean locked = false;
 
     private JPanel panel;
 
@@ -18,8 +22,7 @@ public class Frame extends JFrame {
 
     public Frame() {
         loadPanel();
-        loadPlaceholder();
-//        loadCamera();
+        loadPath();
         loadAnalytics();
         loadFrame();
     }
@@ -37,8 +40,8 @@ public class Frame extends JFrame {
         setContentPane(panel);
     }
 
-    private void loadPlaceholder(){
-        JPanel placeholder = new JPanel();
+    private void loadPath() {
+        Path placeholder = new Path();
         placeholder.setSize(WINDOW_WIDTH / 2, WINDOW_HEIGHT);
         panel.add(placeholder);
     }
@@ -76,6 +79,21 @@ public class Frame extends JFrame {
         log = new Log();
         log.setSize(WINDOW_WIDTH / 2, (int) (WINDOW_HEIGHT / 3));
         analytics.add(log);
+    }
+
+    public static void disconnected() {
+        if (!locked) {
+            locked = true;
+            int result = JOptionPane.showConfirmDialog(new JFrame(), "Robot Disconnected - Reconnect?");
+            if (result == JOptionPane.OK_OPTION) {
+                new Thread(() -> {
+                    Communicator.reconnect();
+                    locked = false;
+                }).start();
+            } else if (result == JOptionPane.NO_OPTION || result == JOptionPane.CANCEL_OPTION) {
+                locked = true;
+            }
+        }
     }
 
 }

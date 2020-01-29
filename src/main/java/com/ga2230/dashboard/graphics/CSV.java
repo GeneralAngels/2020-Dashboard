@@ -93,7 +93,7 @@ public class CSV extends Panel {
                 }
             }
         });
-        fullRobotJson.begin(10);
+        fullRobotJson.begin(20);
     }
 
     private void update() {

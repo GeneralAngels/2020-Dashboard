@@ -1,5 +1,7 @@
 package com.ga2230.dashboard.communications;
 
+import com.ga2230.dashboard.graphics.Frame;
+
 import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
@@ -38,6 +40,8 @@ public class Communicator {
         private boolean connected = false;
         private boolean loop = true;
 
+        private static long lastInput = 0;
+
         public Broadcast<String> getBroadcast() {
             return broadcast;
         }
@@ -70,13 +74,12 @@ public class Communicator {
                         String result = reader.readLine();
                         if (result != null)
                             broadcast.send(result);
+                        lastInput = System.currentTimeMillis();
                     }
                     loop = !loop;
                 }
-            } catch (SocketException e) {
-                reconnect();
             } catch (IOException e) {
-                e.printStackTrace();
+                Frame.disconnected();
             }
         }
 
