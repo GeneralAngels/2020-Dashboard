@@ -10,8 +10,6 @@ public class Frame extends JFrame {
     private static final int WINDOW_WIDTH = 1366;
     static final int FONT_SIZE = 25;
 
-    private static boolean locked = false;
-
     private JPanel panel;
 
     private Panel analytics;
@@ -81,19 +79,6 @@ public class Frame extends JFrame {
         analytics.add(log);
     }
 
-    public static void disconnected() {
-        if (!locked) {
-            locked = true;
-            int result = JOptionPane.showConfirmDialog(new JFrame(), "Robot Disconnected - Reconnect?");
-            if (result == JOptionPane.OK_OPTION) {
-                new Thread(() -> {
-                    Communicator.reconnect();
-                    locked = false;
-                }).start();
-            } else if (result == JOptionPane.NO_OPTION || result == JOptionPane.CANCEL_OPTION) {
-                locked = true;
-            }
-        }
-    }
+
 
 }
