@@ -23,6 +23,7 @@ public class Frame extends JFrame {
         loadPath();
         loadAnalytics();
         loadFrame();
+        Communicator.setFrame(this);
     }
 
     private void loadFrame() {

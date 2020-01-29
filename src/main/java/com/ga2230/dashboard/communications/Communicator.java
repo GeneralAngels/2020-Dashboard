@@ -22,14 +22,27 @@ public class Communicator {
 
     private static boolean locked = false;
 
+    private static JFrame frame;
+
+    public static void setFrame(JFrame frame) {
+        Communicator.frame = frame;
+    }
+
     public static void reconnect() {
         new Thread(() -> {
             for (Topic topic : topics) {
+                System.out.println("Here");
                 new Thread(() -> {
-                    try {
-                        topic.reconnect();
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                    System.out.println("Here2");
+                    for (int i = 0; i < 10; i++) {
+                        if (!topic.isConnected()) {
+                            try {
+                                topic.reconnect();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        } else
+                            break;
                     }
                 }).start();
             }
@@ -43,12 +56,14 @@ public class Communicator {
 
     public static void disconnected() {
         if (!locked) {
-            locked = true;
-            int result = JOptionPane.showConfirmDialog(new JFrame(), "Disconnected - Reconnect?", "Oopsi", JOptionPane.YES_NO_OPTION);
-            if (result == JOptionPane.YES_OPTION) {
-                Communicator.reconnect();
-            } else if (result == JOptionPane.NO_OPTION || result == JOptionPane.CANCEL_OPTION) {
+            if (frame != null) {
                 locked = true;
+                int result = JOptionPane.showConfirmDialog(frame, "Disconnected - Reconnect?", "Oopsi", JOptionPane.YES_NO_OPTION);
+                if (result == JOptionPane.YES_OPTION) {
+                    Communicator.reconnect();
+                } else if (result == JOptionPane.NO_OPTION || result == JOptionPane.CANCEL_OPTION) {
+                    locked = true;
+                }
             }
         }
     }
@@ -75,6 +90,7 @@ public class Communicator {
 
         public void reconnect() throws IOException {
             connected = false;
+//            System.out.println("Dis");
             if (reader != null && writer != null && socket != null) {
                 try {
                     reader.close();
@@ -84,12 +100,13 @@ public class Communicator {
                 }
             }
             socket = new Socket();
-            for (int i = 0; i < 10 && !socket.isConnected(); i++)
-                socket.connect(new InetSocketAddress("10.22.30.2", 2230), 500);
-            System.out.println("Here");
+            socket.connect(new InetSocketAddress("10.22.30.2", 2230), 1000);
+//            System.out.println("Con");
             writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+//            System.out.println("OK");
             connected = true;
+            loop = true; // Must have this fucking line
         }
 
         private void loop() {
@@ -101,8 +118,11 @@ public class Communicator {
                         writer.flush();
                     } else {
                         String result = reader.readLine();
-                        if (result != null)
-                            broadcast.send(result);
+                        try {
+                            if (result != null)
+                                broadcast.send(result);
+                        } catch (Exception ignored) {
+                        }
                     }
                     loop = !loop;
                 }
