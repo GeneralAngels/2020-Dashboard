@@ -5,7 +5,6 @@ import com.ga2230.dashboard.communications.Communicator;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import javax.swing.*;
 import java.awt.*;
 
 public class Path extends Panel {
@@ -14,11 +13,15 @@ public class Path extends Panel {
 
     private static final int WORLD_TO_SCREEN = 150; // Pixels per meter
 
+    private static final int PATH_POINT_SIZE_PX = 4;
+
+    private static final double CUBE_SIZE_M = 0.1;
+    private static final double OFFSET_DIVIDER = 4;
+
     private int x, y;
 
     private double cubeX, cubeY, cubeTheta;
 
-    private double cubeSize = 0.1;
 
     public Path() {
         Communicator.Topic path = new Communicator.Topic();
@@ -69,20 +72,20 @@ public class Path extends Panel {
                     y = myObject.getDouble("y");
                     x *= WORLD_TO_SCREEN;
                     y *= WORLD_TO_SCREEN;
-                    x += this.x / 4; // Fucking offset
-                    y += this.y / 4;
-                    g.fillRect((int) x, this.y - (int) y, 4, 4);
+                    x += this.x / OFFSET_DIVIDER; // Fucking offset
+                    y += this.y / OFFSET_DIVIDER;
+                    g.fillRect((int) x - PATH_POINT_SIZE_PX / 2, this.y - (int) y - PATH_POINT_SIZE_PX / 2, PATH_POINT_SIZE_PX, PATH_POINT_SIZE_PX);
                 }
             }
         }
         double x, y;
         x = cubeX * WORLD_TO_SCREEN;
         y = cubeY * WORLD_TO_SCREEN;
-        x += this.x / 4; // Fucking offset
-        y += this.y / 4;
+        x += this.x / OFFSET_DIVIDER; // Fucking offset
+        y += this.y / OFFSET_DIVIDER;
         g.setColor(Color.BLUE);
-        Rectangle rectangle = new Rectangle((int) x, (int) (this.y - y), (int) (cubeSize * WORLD_TO_SCREEN), (int) (cubeSize * WORLD_TO_SCREEN));
-        g.rotate(Math.toRadians(cubeTheta), rectangle.x + rectangle.width / 2, rectangle.y + rectangle.height / 2);
+        Rectangle rectangle = new Rectangle((int) x - ((int) (CUBE_SIZE_M * WORLD_TO_SCREEN) / 2), (int) (this.y - y) - ((int) (CUBE_SIZE_M * WORLD_TO_SCREEN) / 2), (int) (CUBE_SIZE_M * WORLD_TO_SCREEN), (int) (CUBE_SIZE_M * WORLD_TO_SCREEN));
+        g.rotate(Math.toRadians(cubeTheta), rectangle.x, rectangle.y);
         g.draw(rectangle);
         g.fill(rectangle);
 //        g.drawRect(((int) cubeX) * WORLD_TO_SCREEN, this.y - ((int) (cubeY * WORLD_TO_SCREEN)), (int) (cubeSize * WORLD_TO_SCREEN), (int) (cubeSize * WORLD_TO_SCREEN));
