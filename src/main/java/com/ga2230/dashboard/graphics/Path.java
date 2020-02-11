@@ -25,7 +25,7 @@ public class Path extends Panel {
 
     public Path() {
         Communicator.Topic path = new Communicator.Topic();
-        path.setCommand("pathman get_da_yeet");
+        path.setCommand("master get_trajectory");
         path.getBroadcast().listen(new Broadcast.Listener<String>() {
             @Override
             public void update(String thing) {
