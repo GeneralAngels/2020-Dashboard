@@ -113,9 +113,11 @@ public class Communicator {
             try {
                 if (connected) {
                     if (loop) {
-                        writer.write(command);
-                        writer.newLine();
-                        writer.flush();
+                        if (command != null) {
+                            writer.write(command);
+                            writer.newLine();
+                            writer.flush();
+                        }
                     } else {
                         String result = reader.readLine();
                         try {
@@ -140,12 +142,31 @@ public class Communicator {
             } catch (IOException e) {
                 Communicator.disconnected();
             }
-            new Timer().scheduleAtFixedRate(new TimerTask() {
-                @Override
-                public void run() {
-                    loop();
-                }
-            }, 0, (long) (1000.0 / refreshRate));
+            if (refreshRate > 0) {
+                new Timer().scheduleAtFixedRate(new TimerTask() {
+                    @Override
+                    public void run() {
+                        loop();
+                    }
+                }, 0, (long) (1000.0 / refreshRate));
+            }
+        }
+
+        public void single(double rate) {
+            try {
+                this.reconnect();
+            } catch (IOException e) {
+                Communicator.disconnected();
+            }
+            if (rate > 0) {
+                new Timer().scheduleAtFixedRate(new TimerTask() {
+                    @Override
+                    public void run() {
+                        loop();
+                        setCommand(null);
+                    }
+                }, 0, (long) (1000.0 / rate));
+            }
         }
 
         public void stop() {

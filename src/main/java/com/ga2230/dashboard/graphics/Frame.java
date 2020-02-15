@@ -24,6 +24,7 @@ public class Frame extends JFrame {
         loadAnalytics();
         loadFrame();
         Communicator.setFrame(this);
+        Status.setFrame(this);
     }
 
     private void loadFrame() {
