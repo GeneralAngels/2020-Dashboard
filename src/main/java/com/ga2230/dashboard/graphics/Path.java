@@ -11,12 +11,12 @@ public class Path extends Panel {
 
     private JSONArray array;
 
-    private static final int WORLD_TO_SCREEN = 150; // Pixels per meter
+    private static final int WORLD_TO_SCREEN = 50; // Pixels per meter
 
     private static final int PATH_POINT_SIZE_PX = 4;
 
-    private static final double CUBE_SIZE_M = 0.1;
-    private static final double OFFSET_DIVIDER = 4;
+    private static final double CUBE_SIZE_M = 0.5;
+    private static final double OFFSET_DIVIDER = 2;
 
     private int x, y;
 
@@ -85,7 +85,7 @@ public class Path extends Panel {
         y += this.y / OFFSET_DIVIDER;
         g.setColor(Color.BLUE);
         Rectangle rectangle = new Rectangle((int) x - ((int) (CUBE_SIZE_M * WORLD_TO_SCREEN) / 2), (int) (this.y - y) - ((int) (CUBE_SIZE_M * WORLD_TO_SCREEN) / 2), (int) (CUBE_SIZE_M * WORLD_TO_SCREEN), (int) (CUBE_SIZE_M * WORLD_TO_SCREEN));
-        g.rotate(Math.toRadians(cubeTheta), rectangle.x, rectangle.y);
+        g.rotate(Math.toRadians(-cubeTheta), rectangle.x, rectangle.y);
         g.draw(rectangle);
         g.fill(rectangle);
 //        g.drawRect(((int) cubeX) * WORLD_TO_SCREEN, this.y - ((int) (cubeY * WORLD_TO_SCREEN)), (int) (cubeSize * WORLD_TO_SCREEN), (int) (cubeSize * WORLD_TO_SCREEN));
