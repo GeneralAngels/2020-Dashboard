@@ -37,10 +37,15 @@ public class Status extends Panel {
                     chooser.showDialog(Status.frame, "Upload");
                     File file = chooser.getSelectedFile();
                     if (file != null) {
-                        String string = Files.readString(file.toPath());
-                        string = string.replaceAll("\r", "");
+                        List<String> strings = Files.readAllLines(file.toPath());
+                        StringBuilder builder = new StringBuilder();
+                        for (String s : strings) {
+                            if (builder.length() > 0)
+                                builder.append(",");
+                            builder.append(s);
+                        }
                         // Base64
-                        String base64 = new String(Base64.getEncoder().encode(string.getBytes()));
+                        String base64 = new String(Base64.getEncoder().encode(builder.toString().getBytes()));
                         // CRC
                         CRC32 crc = new CRC32();
                         crc.update(base64.getBytes());
@@ -58,7 +63,9 @@ public class Status extends Panel {
                         topic.single(5);
                     }
                 } catch (Exception eh) {
-                    eh.printStackTrace();
+                    if (frame != null) {
+                        JOptionPane.showMessageDialog(frame, eh.toString(), "Auto load state", JOptionPane.ERROR_MESSAGE);
+                    }
                 }
             }
         });
