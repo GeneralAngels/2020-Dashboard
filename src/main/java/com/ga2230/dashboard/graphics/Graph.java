@@ -126,13 +126,13 @@ public class Graph extends Panel {
             lastX = thing;
             Graph.this.update();
         });
-        xTopic.begin(5);
+        xTopic.begin(15);
         yTopic = new Communicator.Topic();
         yTopic.getBroadcast().listen(thing -> {
             lastY = thing;
             Graph.this.update();
         });
-        yTopic.begin(5);
+        yTopic.begin(15);
     }
 
     private void update() {
