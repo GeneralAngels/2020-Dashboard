@@ -70,7 +70,9 @@ public class Communicator {
 
     public static class Topic {
 
-        private static final String ADDRESS = "roboRIO-2230-FRC";
+//        private static final String ADDRESS = "roboRIO-2230-FRC";
+        private static final String ADDRESS = "10.22.30.2";
+        private static final int PORT = 5800;
 
         private String command = "master json";
         private Broadcast<String> broadcast = new Broadcast<>();
@@ -102,7 +104,7 @@ public class Communicator {
                 }
             }
             socket = new Socket();
-            socket.connect(new InetSocketAddress(ADDRESS, 2230), 1000);
+            socket.connect(new InetSocketAddress(ADDRESS, PORT), 1000);
 //            System.out.println("Con");
             writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
