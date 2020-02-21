@@ -17,14 +17,17 @@ public class Frame extends JFrame {
     private Graph graph;
     private CSV csv;
     private Log log;
+    private Stream stream;
 
     public Frame() {
         loadPanel();
         loadPath();
+//        loadStream();
         loadAnalytics();
         loadFrame();
         Communicator.setFrame(this);
         Status.setFrame(this);
+//        stream.play();
     }
 
     private void loadFrame() {
@@ -38,6 +41,12 @@ public class Frame extends JFrame {
         panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
         setContentPane(panel);
+    }
+
+    private void loadStream(){
+        stream = new Stream();
+        stream.setSize(WINDOW_WIDTH / 2, WINDOW_HEIGHT);
+        panel.add(stream);
     }
 
     private void loadPath() {
