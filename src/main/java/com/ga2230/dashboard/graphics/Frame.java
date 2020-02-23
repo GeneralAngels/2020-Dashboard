@@ -6,6 +6,8 @@ import javax.swing.*;
 
 public class Frame extends JFrame {
 
+    private static final boolean STREAM = true;
+
     private static final int WINDOW_HEIGHT = 528;
     private static final int WINDOW_WIDTH = 1366;
     static final int FONT_SIZE = 25;
@@ -19,15 +21,18 @@ public class Frame extends JFrame {
     private Log log;
     private Stream stream;
 
-    public Frame() {
+    public Frame() throws Exception {
         loadPanel();
-        loadPath();
-//        loadStream();
+        if (STREAM)
+            loadStream();
+        else
+            loadPath();
         loadAnalytics();
         loadFrame();
         Communicator.setFrame(this);
         Status.setFrame(this);
-//        stream.play();
+        if (STREAM)
+            stream.play();
     }
 
     private void loadFrame() {
@@ -43,7 +48,7 @@ public class Frame extends JFrame {
         setContentPane(panel);
     }
 
-    private void loadStream(){
+    private void loadStream() throws Exception {
         stream = new Stream();
         stream.setSize(WINDOW_WIDTH / 2, WINDOW_HEIGHT);
         panel.add(stream);
@@ -89,7 +94,6 @@ public class Frame extends JFrame {
         log.setSize(WINDOW_WIDTH / 2, (int) (WINDOW_HEIGHT / 3));
         analytics.add(log);
     }
-
 
 
 }

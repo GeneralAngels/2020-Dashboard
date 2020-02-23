@@ -2,7 +2,6 @@ package com.ga2230.dashboard.graphics;
 
 import com.ga2230.dashboard.communications.Broadcast;
 import com.ga2230.dashboard.communications.Communicator;
-import com.ga2230.dashboard.util.ModuleHelper;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
