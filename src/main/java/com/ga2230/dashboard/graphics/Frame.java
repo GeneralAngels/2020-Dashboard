@@ -21,18 +21,18 @@ public class Frame extends JFrame {
     private Log log;
     private Stream stream;
 
-    public Frame() {
+    public Frame(boolean type) {
         loadPanel();
-        if (STREAM)
+        if (type) {
             loadStream();
-        else
+            stream.play();
+        } else {
             loadPath();
+        }
         loadAnalytics();
         loadFrame();
         Communicator.setFrame(this);
         Status.setFrame(this);
-        if (STREAM)
-            stream.play();
     }
 
     private void loadFrame() {

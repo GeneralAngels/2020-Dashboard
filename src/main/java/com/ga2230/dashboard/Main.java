@@ -9,7 +9,11 @@ public class Main {
     public static void main(String[] args) {
         loadLicense();
         loadTheme();
-        loadFrame();
+        if (args.length > 0) {
+            loadFrame(args[0].equals("stream"));
+        }else{
+            loadFrame(false);
+        }
     }
 
     private static void loadLicense() {
@@ -24,8 +28,8 @@ public class Main {
         }
     }
 
-    private static void loadFrame() {
-            Frame frame = new Frame();
+    private static void loadFrame(boolean type) {
+        Frame frame = new Frame(type);
     }
 
 }
