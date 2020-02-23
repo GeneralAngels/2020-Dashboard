@@ -21,7 +21,7 @@ public class Frame extends JFrame {
     private Log log;
     private Stream stream;
 
-    public Frame() throws Exception {
+    public Frame() {
         loadPanel();
         if (STREAM)
             loadStream();
@@ -48,7 +48,7 @@ public class Frame extends JFrame {
         setContentPane(panel);
     }
 
-    private void loadStream() throws Exception {
+    private void loadStream() {
         stream = new Stream();
         stream.setSize(WINDOW_WIDTH / 2, WINDOW_HEIGHT);
         panel.add(stream);

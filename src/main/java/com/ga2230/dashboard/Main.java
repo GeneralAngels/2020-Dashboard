@@ -25,11 +25,7 @@ public class Main {
     }
 
     private static void loadFrame() {
-        try {
             Frame frame = new Frame();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
 }
