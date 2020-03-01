@@ -1,7 +1,6 @@
 package com.ga2230.dashboard.graphics;
 
-import com.ga2230.dashboard.communications.Broadcast;
-import com.ga2230.dashboard.communications.Communicator;
+import com.ga2230.dashboard.communications.Connection;
 import org.json.JSONObject;
 
 import javax.swing.*;
@@ -80,20 +79,19 @@ public class CSV extends Panel {
         add(bookmark);
         add(clear);
         setLayout(new GridLayout(1, 4));
-        Communicator.Topic fullRobotJson = new Communicator.Topic();
-        fullRobotJson.setCommand("master telemetry");
-        fullRobotJson.getBroadcast().listen(new Broadcast.Listener<String>() {
+
+        Connection telemetryConnection = new Connection(2230, 20, false);
+        telemetryConnection.send("robot telemetry", new Connection.Callback() {
             @Override
-            public void update(String thing) {
+            public void callback(boolean finished, String result) {
                 try {
-                    full = new JSONObject(thing);
+                    full = new JSONObject(result);
                     CSV.this.update();
                 } catch (Exception ignored) {
-
                 }
             }
         });
-        fullRobotJson.begin(20);
+        telemetryConnection.open();
     }
 
     private void update() {

@@ -1,13 +1,10 @@
 package com.ga2230.dashboard.graphics;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ga2230.dashboard.communications.Broadcast;
-import com.ga2230.dashboard.communications.Communicator;
+import com.ga2230.dashboard.communications.Connection;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.io.IOException;
 
 public class Log extends Panel {
 
@@ -25,15 +22,15 @@ public class Log extends Panel {
         setBackground(Color.BLACK);
         add(scrollPane);
 
-        Communicator.Topic woahTelemetry = new Communicator.Topic();
-        woahTelemetry.setCommand("master telemetry");
-        woahTelemetry.getBroadcast().listen(new Broadcast.Listener<String>() {
+        Connection telemetryConnection = new Connection(2230, 5, false);
+        telemetryConnection.send("robot telemetry", new Connection.Callback() {
             @Override
-            public void update(String thing) {
-                textArea.setText(beautify(thing));
+            public void callback(boolean finished, String result) {
+                textArea.setForeground(finished ? Color.GREEN : Color.RED);
+                textArea.setText(beautify(result));
             }
         });
-        woahTelemetry.begin(5);
+        telemetryConnection.open();
     }
 
     private String beautify(String json) {

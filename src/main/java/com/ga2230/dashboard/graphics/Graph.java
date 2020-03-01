@@ -1,7 +1,6 @@
 package com.ga2230.dashboard.graphics;
 
-import com.ga2230.dashboard.communications.Broadcast;
-import com.ga2230.dashboard.communications.Communicator;
+import com.ga2230.dashboard.communications.Connection;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -29,10 +28,10 @@ public class Graph extends Panel {
     private JButton addPoint, clearAll;
     private JTextField realtimeX, realtimeY;
 
-    private Communicator.Topic xTopic, yTopic;
+    private Connection xTopic, yTopic;
 
-    private String xCoordinates = "master>time";
-    private String yCoordinates = "master>time";
+    private String xCoordinates = "robot>time";
+    private String yCoordinates = "robot>time";
     private String lastX, lastY;
 
     public Graph() {
@@ -120,18 +119,14 @@ public class Graph extends Panel {
         uiPanel.add(clearAll);
         add(uiPanel);
         add(chartPanel);
-        xTopic = new Communicator.Topic();
-        xTopic.getBroadcast().listen(thing -> {
-            lastX = thing;
-            Graph.this.update();
-        });
-        xTopic.begin(15);
-        yTopic = new Communicator.Topic();
-        yTopic.getBroadcast().listen(thing -> {
-            lastY = thing;
-            Graph.this.update();
-        });
-        yTopic.begin(15);
+
+        xTopic = new Connection(2230, 20, false);
+        xTopic.open();
+
+        yTopic = new Connection(2230, 20, false);
+        yTopic.open();
+
+        clearChart();
     }
 
     private void update() {
@@ -155,8 +150,22 @@ public class Graph extends Panel {
     }
 
     public void clearChart() {
-        xTopic.setCommand(xCoordinates.split(">")[0] + " json");
-        yTopic.setCommand(yCoordinates.split(">")[0] + " json");
+        xTopic.clear();
+        xTopic.send(xCoordinates.split(">")[0] + " telemetry", new Connection.Callback() {
+            @Override
+            public void callback(boolean finished, String result) {
+                lastX = result;
+                Graph.this.update();
+            }
+        });
+        yTopic.clear();
+        yTopic.send(yCoordinates.split(">")[0] + " telemetry", new Connection.Callback() {
+            @Override
+            public void callback(boolean finished, String result) {
+                lastY = result;
+                Graph.this.update();
+            }
+        });
         logSeries.clear();
     }
 

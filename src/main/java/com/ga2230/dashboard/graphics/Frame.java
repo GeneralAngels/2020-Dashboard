@@ -6,6 +6,12 @@ import javax.swing.*;
 
 public class Frame extends JFrame {
 
+    private static Frame instance;
+
+    public static Frame getFrame() {
+        return instance;
+    }
+
     private static final boolean STREAM = true;
 
     private static final int WINDOW_HEIGHT = 528;
@@ -22,6 +28,7 @@ public class Frame extends JFrame {
     private Stream stream;
 
     public Frame(boolean type) {
+        instance = this;
         loadPanel();
         if (type) {
             loadStream();
@@ -31,8 +38,6 @@ public class Frame extends JFrame {
         }
         loadAnalytics();
         loadFrame();
-        Communicator.setFrame(this);
-        Status.setFrame(this);
     }
 
     private void loadFrame() {

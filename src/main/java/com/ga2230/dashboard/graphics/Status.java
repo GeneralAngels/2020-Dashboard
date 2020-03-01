@@ -1,71 +1,67 @@
 package com.ga2230.dashboard.graphics;
 
-import com.ga2230.dashboard.communications.Broadcast;
 import com.ga2230.dashboard.communications.Communicator;
+import com.ga2230.dashboard.communications.Connection;
 
 import javax.swing.*;
-import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
-import java.util.zip.CRC32;
 
 public class Status extends Panel {
 
-    private static JFrame frame;
-
-    public static void setFrame(JFrame frame) {
-        Status.frame = frame;
-    }
+    private Connection connection;
 
     private JButton autonomousButton, reconnectButton;
 
     public Status() {
+
+        connection = new Connection(2230, 1, true);
+        connection.open();
+
         autonomousButton = new JButton("Upload new autonomous");
         autonomousButton.addActionListener(new AbstractAction() {
             @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    JFileChooser chooser = new JFileChooser();
-                    FileNameExtensionFilter filter = new FileNameExtensionFilter("2230 Auto File", "2230");
-                    chooser.setFileFilter(filter);
-                    chooser.showDialog(Status.frame, "Upload");
-                    File file = chooser.getSelectedFile();
-                    if (file != null) {
+            public void actionPerformed(ActionEvent a) {
+                // Choose a file
+                JFileChooser chooser = new JFileChooser();
+                chooser.setFileFilter(new FileNameExtensionFilter("Shleam Script", "shleam", "2230"));
+                chooser.setDialogType(JFileChooser.FILES_ONLY);
+                chooser.showDialog(Frame.getFrame(), "Upload");
+                // Make sure chosen file isn't null
+                File file = chooser.getSelectedFile();
+                if (file != null) {
+                    // Try reading the file
+                    try {
+                        // Read the file
                         List<String> strings = Files.readAllLines(file.toPath());
+                        // Rebuild the file
                         StringBuilder builder = new StringBuilder();
                         for (String s : strings) {
                             if (builder.length() > 0)
-                                builder.append(",");
+                                builder.append("\n");
                             builder.append(s);
                         }
-                        // Base64
-                        String base64 = new String(Base64.getEncoder().encode(builder.toString().getBytes()));
-                        // CRC
-                        CRC32 crc = new CRC32();
-                        crc.update(base64.getBytes());
-                        // Send it
-                        Communicator.Topic topic = new Communicator.Topic();
-                        topic.setCommand("autonomous load " + base64);
-                        topic.getBroadcast().listen(new Broadcast.Listener<String>() {
+                        // Encode the file
+                        String command = "runtime load " + builder.toString();
+                        String base64 = new String(Base64.getEncoder().encode(command.getBytes()));
+                        // Upload the file
+                        connection.send("base64:" + base64, new Connection.Callback() {
                             @Override
-                            public void update(String thing) {
-                                if (frame != null) {
-                                    JOptionPane.showMessageDialog(frame, thing.equals(String.valueOf(crc.getValue())) ? "Autonomous loaded" : "Not loaded!", "Auto load state", thing.equals(String.valueOf(crc.getValue())) ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.ERROR_MESSAGE);
-                                }
+                            public void callback(boolean finished, String result) {
+                                setStatus(finished, new String(Base64.getDecoder().decode(result.getBytes())));
                             }
                         });
-                        topic.single(5);
+                    } catch (IOException e) {
+                        setStatus(false, e.toString());
                     }
-                } catch (Exception eh) {
-                    if (frame != null) {
-                        JOptionPane.showMessageDialog(frame, eh.toString(), "Auto load state", JOptionPane.ERROR_MESSAGE);
-                    }
+                } else {
+                    setStatus(false, "You must choose a file");
                 }
             }
         });
@@ -81,27 +77,7 @@ public class Status extends Panel {
         add(autonomousButton);
     }
 
-    private class StatusField extends JLabel {
-
-        private String icon;
-
-        public StatusField(String icon) {
-            this.icon = icon;
-            setHorizontalAlignment(JLabel.CENTER);
-            setFont(new Font(Font.SANS_SERIF, Font.PLAIN, Frame.FONT_SIZE));
-            setOpaque(false);
-        }
-
-        @Override
-        public void setText(String text) {
-            super.setText(icon + " " + text);
-        }
-
-        public void setSize(int width, int height) {
-            Dimension dimension = new Dimension(width, height);
-            setPreferredSize(dimension);
-            setMinimumSize(dimension);
-            setMaximumSize(dimension);
-        }
+    private void setStatus(boolean finished, String message) {
+        JOptionPane.showMessageDialog(Frame.getFrame(), message, finished ? "Status report" : "Error report", finished ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.ERROR_MESSAGE);
     }
 }

@@ -1,7 +1,6 @@
 package com.ga2230.dashboard.graphics;
 
-import com.ga2230.dashboard.communications.Broadcast;
-import com.ga2230.dashboard.communications.Communicator;
+import com.ga2230.dashboard.communications.Connection;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -24,29 +23,30 @@ public class Path extends Panel {
 
 
     public Path() {
-        Communicator.Topic path = new Communicator.Topic();
-        path.setCommand("path fetch");
-        path.getBroadcast().listen(new Broadcast.Listener<String>() {
+        Connection pathConnection = new Connection(2230, 2, false);
+        pathConnection.send("path fetch", new Connection.Callback() {
             @Override
-            public void update(String thing) {
-                array = new JSONArray(thing);
+            public void callback(boolean finished, String result) {
+                array = new JSONArray(result);
                 repaint();
             }
         });
-        path.begin(5);
-        Communicator.Topic odom = new Communicator.Topic();
-        odom.setCommand("odometry json");
-        odom.getBroadcast().listen(new Broadcast.Listener<String>() {
+
+        pathConnection.open();
+
+        Connection odometryConnection = new Connection(2230, 5, false);
+        odometryConnection.send("odometry telemetry", new Connection.Callback() {
             @Override
-            public void update(String thing) {
-                JSONObject object = new JSONObject(thing);
+            public void callback(boolean finished, String result) {
+                JSONObject object = new JSONObject(result);
                 cubeX = object.getDouble("x");
                 cubeY = object.getDouble("y");
                 cubeTheta = object.getDouble("theta");
                 repaint();
             }
         });
-        odom.begin(5);
+
+        odometryConnection.open();
     }
 
     @Override

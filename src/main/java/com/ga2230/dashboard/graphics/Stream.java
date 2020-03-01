@@ -17,7 +17,6 @@ import java.util.TimerTask;
 public class Stream extends Panel {
 
     private static final int PORT = 5810;
-    //    private static final String ADDRESS = "192.168.0.106";
     private static final String ADDRESS = "10.22.30.20";
 
     private static final String URL = "http://" + ADDRESS + ":" + PORT + "/";
