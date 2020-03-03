@@ -1,5 +1,7 @@
 package com.ga2230.dashboard.communications;
 
+import com.ga2230.dashboard.configuration.Configuration;
+
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -39,7 +41,19 @@ public class Connection {
         Communicator.register(this);
     }
 
+    public static Connection openConnection(double refreshRate, boolean queue) {
+        Connection connection = new Connection(Configuration.load().getTeam(), refreshRate, queue);
+        connection.open();
+        return connection;
+    }
+
     public void open() {
+        if (socket != null) {
+            try {
+                socket.close();
+            } catch (IOException ignored) {
+            }
+        }
         try {
             connected = false;
             connect();
@@ -76,6 +90,8 @@ public class Connection {
                 }
             }, 0, (long) (1000.0 / refreshRate));
         }
+        // Clear queues
+        clear();
     }
 
     public void clear() {
@@ -106,7 +122,7 @@ public class Connection {
                 String[] split = result.split(":", 2);
                 // Call callback
                 Callback callback = callbackQueue.peek();
-                if (callback != null)
+                if (callback != null && split.length == 2)
                     callback.callback(Boolean.parseBoolean(split[0]), split[1]);
                 // Pop
                 if (this.queue)

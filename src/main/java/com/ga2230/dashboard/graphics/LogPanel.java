@@ -6,12 +6,12 @@ import com.ga2230.dashboard.communications.Connection;
 import javax.swing.*;
 import java.awt.*;
 
-public class Log extends Panel {
+public class LogPanel extends Panel {
 
     private JTextArea textArea;
     private JScrollPane scrollPane;
 
-    public Log() {
+    public LogPanel() {
         textArea = new JTextArea();
         scrollPane = new JScrollPane(textArea);
 
@@ -22,7 +22,7 @@ public class Log extends Panel {
         setBackground(Color.BLACK);
         add(scrollPane);
 
-        Connection telemetryConnection = new Connection(2230, 5, false);
+        Connection telemetryConnection = Connection.openConnection( 5, false);
         telemetryConnection.send("robot telemetry", new Connection.Callback() {
             @Override
             public void callback(boolean finished, String result) {
@@ -30,7 +30,6 @@ public class Log extends Panel {
                 textArea.setText(beautify(result));
             }
         });
-        telemetryConnection.open();
     }
 
     private String beautify(String json) {

@@ -1,0 +1,20 @@
+{
+  "team": 2230,
+  "buttons": [
+    {
+      "text": "Auto Loaded",
+      "state": "runtime>state<loaded",
+      "click": ""
+    },
+    {
+      "text": "Odometry Reset",
+      "state": "odometry>x<0.0",
+      "click": "drive reset"
+    },
+    {
+      "text": "Nothing",
+      "state": "",
+      "click": ""
+    }
+  ]
+}

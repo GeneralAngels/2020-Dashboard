@@ -1,6 +1,7 @@
 package com.ga2230.dashboard.graphics;
 
 import com.ga2230.dashboard.communications.Connection;
+import com.ga2230.dashboard.telemetry.TelemetryHelper;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -18,7 +19,7 @@ import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 
-public class Graph extends Panel {
+public class GraphPanel extends Panel {
 
     private XYDataset dataset;
     private XYSeries logSeries, pointSeries, userSeries;
@@ -28,13 +29,15 @@ public class Graph extends Panel {
     private JButton addPoint, clearAll;
     private JTextField realtimeX, realtimeY;
 
+    private TelemetryHelper xHelper, yHelper;
+
     private Connection xTopic, yTopic;
 
     private String xCoordinates = "robot>time";
     private String yCoordinates = "robot>time";
     private String lastX, lastY;
 
-    public Graph() {
+    public GraphPanel() {
         realtimeY = new JTextField(yCoordinates);
         realtimeX = new JTextField(xCoordinates);
         addPoint = new JButton("Add Point");
@@ -111,20 +114,15 @@ public class Graph extends Panel {
         chart = createChart(createDataset());
         chartPanel = new ChartPanel(chart);
         chartPanel.setBackground(Color.white);
-        uiPanel = new JPanel(new GridLayout(2, 2));
+        uiPanel = new JPanel(new GridLayout(1, 2));
         setBackground(Color.ORANGE);
-        uiPanel.add(realtimeX);
         uiPanel.add(realtimeY);
-        uiPanel.add(addPoint);
         uiPanel.add(clearAll);
         add(uiPanel);
         add(chartPanel);
 
-        xTopic = new Connection(2230, 20, false);
-        xTopic.open();
-
-        yTopic = new Connection(2230, 20, false);
-        yTopic.open();
+        xHelper = new TelemetryHelper(20);
+        yHelper = new TelemetryHelper(20);
 
         clearChart();
     }
@@ -133,37 +131,25 @@ public class Graph extends Panel {
         try {
             if (lastX != null &&
                     lastY != null) {
-                JSONObject x = new JSONObject(lastX);
-                JSONObject y = new JSONObject(lastY);
-                String[] xKeys = xCoordinates.split(">");
-                String[] yKeys = yCoordinates.split(">");
-                if (xKeys.length > 1 &&
-                        yKeys.length > 1) {
-                    if (x.has(xKeys[1]) &&
-                            y.has(yKeys[1])) {
-                        logSeries.add(x.getDouble(xKeys[1]), y.getDouble(yKeys[1]));
-                    }
-                }
+                logSeries.add(Double.parseDouble(lastX), Double.parseDouble(lastY));
             }
         } catch (Exception ignored) {
         }
     }
 
     public void clearChart() {
-        xTopic.clear();
-        xTopic.send(xCoordinates.split(">")[0] + " telemetry", new Connection.Callback() {
+        xHelper.configure(xCoordinates.split(">")[0], xCoordinates.split(">")[1], new TelemetryHelper.Callback() {
             @Override
-            public void callback(boolean finished, String result) {
-                lastX = result;
-                Graph.this.update();
+            public void callback(String value) {
+                lastX = value;
+                GraphPanel.this.update();
             }
         });
-        yTopic.clear();
-        yTopic.send(yCoordinates.split(">")[0] + " telemetry", new Connection.Callback() {
+        yHelper.configure(yCoordinates.split(">")[0], yCoordinates.split(">")[1], new TelemetryHelper.Callback() {
             @Override
-            public void callback(boolean finished, String result) {
-                lastY = result;
-                Graph.this.update();
+            public void callback(String value) {
+                lastY = value;
+                GraphPanel.this.update();
             }
         });
         logSeries.clear();
@@ -232,7 +218,7 @@ public class Graph extends Panel {
 
     @Override
     public void setSize(int width, int height) {
-        Dimension sourceDimention = new Dimension(width - 6, height / 5);
+        Dimension sourceDimention = new Dimension(width - 6, height / 8);
         Dimension dimension = new Dimension(width - 6, height - 14 - sourceDimention.height);
         chartPanel.setSize(dimension);
         chartPanel.setPreferredSize(dimension);

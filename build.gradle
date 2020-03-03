@@ -30,6 +30,7 @@ task fatJar(type: Jar) {
 }
 
 dependencies {
+    compile group: 'commons-io', name: 'commons-io', version: '2.6'
     compile group: 'org.json', name: 'json', version: '20190722'
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.6.1'
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.6.1'

@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 
-public class CSV extends Panel {
+public class CSVPanel extends Panel {
 
     boolean record = false;
 
@@ -25,7 +25,7 @@ public class CSV extends Panel {
 
     private JSONObject full = new JSONObject();
 
-    public CSV() {
+    public CSVPanel() {
         toggle = new JButton("Record");
         save = new JButton("Save");
         saveAndOpen = new JButton("Save and Open");
@@ -80,18 +80,17 @@ public class CSV extends Panel {
         add(clear);
         setLayout(new GridLayout(1, 4));
 
-        Connection telemetryConnection = new Connection(2230, 20, false);
+        Connection telemetryConnection = Connection.openConnection(20, false);
         telemetryConnection.send("robot telemetry", new Connection.Callback() {
             @Override
             public void callback(boolean finished, String result) {
                 try {
                     full = new JSONObject(result);
-                    CSV.this.update();
+                    CSVPanel.this.update();
                 } catch (Exception ignored) {
                 }
             }
         });
-        telemetryConnection.open();
     }
 
     private void update() {

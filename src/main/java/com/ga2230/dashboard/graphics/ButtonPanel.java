@@ -13,16 +13,15 @@ import java.nio.file.Files;
 import java.util.Base64;
 import java.util.List;
 
-public class Status extends Panel {
+public class ButtonPanel extends Panel {
 
     private Connection connection;
 
     private JButton autonomousButton, reconnectButton;
 
-    public Status() {
+    public ButtonPanel() {
 
-        connection = new Connection(2230, 1, true);
-        connection.open();
+        connection = Connection.openConnection(1, true);
 
         autonomousButton = new JButton("Upload new autonomous");
         autonomousButton.addActionListener(new AbstractAction() {

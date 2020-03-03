@@ -6,7 +6,7 @@ import org.json.JSONObject;
 
 import java.awt.*;
 
-public class Path extends Panel {
+public class PathView extends Panel {
 
     private JSONArray array;
 
@@ -22,8 +22,8 @@ public class Path extends Panel {
     private double cubeX, cubeY, cubeTheta;
 
 
-    public Path() {
-        Connection pathConnection = new Connection(2230, 2, false);
+    public PathView() {
+        Connection pathConnection = Connection.openConnection(2, false);
         pathConnection.send("path fetch", new Connection.Callback() {
             @Override
             public void callback(boolean finished, String result) {
@@ -32,9 +32,7 @@ public class Path extends Panel {
             }
         });
 
-        pathConnection.open();
-
-        Connection odometryConnection = new Connection(2230, 5, false);
+        Connection odometryConnection = Connection.openConnection(5, false);
         odometryConnection.send("odometry telemetry", new Connection.Callback() {
             @Override
             public void callback(boolean finished, String result) {
@@ -45,8 +43,6 @@ public class Path extends Panel {
                 repaint();
             }
         });
-
-        odometryConnection.open();
     }
 
     @Override
