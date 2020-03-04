@@ -33,6 +33,7 @@ public class StatusPanel extends Panel {
 
         // Actual brain
         // setLayout(new GridLayout((configurations.size() + configurations.size() % 2) / 2, 2));
+
         // No brain
         setLayout(new GridLayout(0, 2));
 

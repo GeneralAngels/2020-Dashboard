@@ -26,12 +26,10 @@ public class GraphPanel extends Panel {
     private JFreeChart chart;
     private ChartPanel chartPanel;
     private JPanel uiPanel;
-    private JButton addPoint, clearAll;
+    private JButton clearAll;
     private JTextField realtimeX, realtimeY;
 
     private TelemetryHelper xHelper, yHelper;
-
-    private Connection xTopic, yTopic;
 
     private String xCoordinates = "robot>time";
     private String yCoordinates = "robot>time";
@@ -40,7 +38,6 @@ public class GraphPanel extends Panel {
     public GraphPanel() {
         realtimeY = new JTextField(yCoordinates);
         realtimeX = new JTextField(xCoordinates);
-        addPoint = new JButton("Add Point");
         clearAll = new JButton("Clear All");
         realtimeY.getDocument().addDocumentListener(new DocumentListener() {
             @Override
@@ -86,40 +83,16 @@ public class GraphPanel extends Panel {
                 clearAll();
             }
         });
-        addPoint.addActionListener(new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String result = JOptionPane.showInputDialog("Add point (x,y) or (0 0)", "0,0");
-                String[] commaCords = result.split(",");
-                String[] spaceCords = result.split(" ");
-                if (commaCords.length == 2) {
-                    try {
-                        double x = Double.parseDouble(commaCords[0].trim());
-                        double y = Double.parseDouble(commaCords[1].trim());
-                        userSeries.add(x, y);
-                    } catch (Exception e1) {
-
-                    }
-                } else if (spaceCords.length == 2) {
-                    try {
-                        double x = Double.parseDouble(spaceCords[0].trim());
-                        double y = Double.parseDouble(spaceCords[1].trim());
-                        userSeries.add(x, y);
-                    } catch (Exception e1) {
-
-                    }
-                }
-            }
-        });
         chart = createChart(createDataset());
         chartPanel = new ChartPanel(chart);
         chartPanel.setBackground(Color.white);
         uiPanel = new JPanel(new GridLayout(1, 2));
-        setBackground(Color.ORANGE);
         uiPanel.add(realtimeY);
         uiPanel.add(clearAll);
         add(uiPanel);
         add(chartPanel);
+
+        setBackground(Color.ORANGE);
 
         xHelper = new TelemetryHelper(20);
         yHelper = new TelemetryHelper(20);
@@ -138,20 +111,24 @@ public class GraphPanel extends Panel {
     }
 
     public void clearChart() {
-        xHelper.configure(xCoordinates.split(">")[0], xCoordinates.split(">")[1], new TelemetryHelper.Callback() {
-            @Override
-            public void callback(String value) {
-                lastX = value;
-                GraphPanel.this.update();
-            }
-        });
-        yHelper.configure(yCoordinates.split(">")[0], yCoordinates.split(">")[1], new TelemetryHelper.Callback() {
-            @Override
-            public void callback(String value) {
-                lastY = value;
-                GraphPanel.this.update();
-            }
-        });
+        if (xCoordinates.split(">").length == 2) {
+            xHelper.configure(xCoordinates.split(">")[0], xCoordinates.split(">")[1], new TelemetryHelper.Callback() {
+                @Override
+                public void callback(String value) {
+                    lastX = value;
+                    GraphPanel.this.update();
+                }
+            });
+        }
+        if (yCoordinates.split(">").length == 2) {
+            yHelper.configure(yCoordinates.split(">")[0], yCoordinates.split(">")[1], new TelemetryHelper.Callback() {
+                @Override
+                public void callback(String value) {
+                    lastY = value;
+                    GraphPanel.this.update();
+                }
+            });
+        }
         logSeries.clear();
     }
 
