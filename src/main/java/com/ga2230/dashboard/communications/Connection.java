@@ -30,12 +30,19 @@ public class Connection {
     private double refreshRate;
     private int teamNumber;
 
+    private Timer timer;
+
     public Connection(int teamNumber, double refreshRate, boolean queue) {
         this.commandQueue = new ArrayDeque<>();
         this.callbackQueue = new ArrayDeque<>();
         this.teamNumber = teamNumber;
         this.refreshRate = refreshRate;
         this.queue = queue;
+
+        this.timer = new Timer();
+
+        // Clear queues
+        clear();
 
         // Add to communicator
         Communicator.register(this);
@@ -47,21 +54,22 @@ public class Connection {
         return connection;
     }
 
-    public void open() {
-        if (socket != null) {
-            try {
-                socket.close();
-            } catch (IOException ignored) {
-            }
-        }
+    public boolean open() {
         try {
             connected = false;
+            prepare();
             connect();
             connected = true;
         } catch (IOException e) {
             connected = false;
             Communicator.disconnected();
         }
+        return connected;
+    }
+
+    public void close() throws IOException {
+        connected = false;
+        socket.close();
     }
 
     private void connect() throws IOException {
@@ -74,29 +82,36 @@ public class Connection {
         // Connect I/O
         writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
         reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        // Make sure we listen to the first command
-        loop = true;
         // Start the loop
         if (refreshRate > 0) {
-            new Timer().scheduleAtFixedRate(new TimerTask() {
-                @Override
-                public void run() {
-                    try {
-                        loop();
-                    } catch (IOException e) {
-                        connected = false;
-                        Communicator.disconnected();
+            try {
+                timer.cancel();
+                timer = new Timer();
+            } catch (Exception ignored) {
+            } finally {
+                timer.scheduleAtFixedRate(new TimerTask() {
+                    @Override
+                    public void run() {
+                        try {
+                            loop();
+                        } catch (IOException e) {
+                            connected = false;
+                            Communicator.disconnected();
+                        }
                     }
-                }
-            }, 0, (long) (1000.0 / refreshRate));
+                }, 0, (long) (1000.0 / refreshRate));
+            }
         }
-        // Clear queues
-        clear();
     }
 
     public void clear() {
         commandQueue.clear();
         callbackQueue.clear();
+        // Change loop
+        prepare();
+    }
+
+    public void prepare() {
         // Change loop
         loop = true;
     }
@@ -107,29 +122,31 @@ public class Connection {
     }
 
     private void loop() throws IOException {
-        if (!commandQueue.isEmpty() || !loop) {
-            if (loop) {
-                writer.write(commandQueue.peek());
-                writer.newLine();
-                writer.flush();
-                // Pop
-                if (this.queue)
-                    commandQueue.remove();
-            } else {
-                // Read result
-                String result = reader.readLine();
-                // Split result
-                String[] split = result.split(":", 2);
-                // Call callback
-                Callback callback = callbackQueue.peek();
-                if (callback != null && split.length == 2)
-                    callback.callback(Boolean.parseBoolean(split[0]), split[1]);
-                // Pop
-                if (this.queue)
-                    callbackQueue.remove();
+        if (connected) {
+            if (!commandQueue.isEmpty() || !callbackQueue.isEmpty()) {
+                if (loop) {
+                    writer.write(commandQueue.peek());
+                    writer.newLine();
+                    writer.flush();
+                    // Pop
+                    if (this.queue)
+                        commandQueue.remove();
+                } else {
+                    // Read result
+                    String result = reader.readLine();
+                    // Split result
+                    String[] split = result.split(":", 2);
+                    // Call callback
+                    Callback callback = callbackQueue.peek();
+                    if (callback != null && split.length == 2)
+                        callback.callback(Boolean.parseBoolean(split[0]), split[1]);
+                    // Pop
+                    if (this.queue)
+                        callbackQueue.remove();
+                }
+                // Switch handler
+                loop = !loop;
             }
-            // Switch handler
-            loop = !loop;
         }
     }
 
