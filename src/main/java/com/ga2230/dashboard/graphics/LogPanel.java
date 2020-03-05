@@ -1,6 +1,7 @@
 package com.ga2230.dashboard.graphics;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ga2230.dashboard.communications.Communicator;
 import com.ga2230.dashboard.communications.Connection;
 
 import javax.swing.*;
@@ -22,14 +23,13 @@ public class LogPanel extends Panel {
         setBackground(Color.BLACK);
         add(scrollPane);
 
-        Connection telemetryConnection = Connection.openConnection(5, Connection.ConnectionType.PeriodicExecution);
-        telemetryConnection.send(new Connection.Command("robot telemetry", new Connection.Callback() {
+        Communicator.TelemetryConnection.register(new Connection.Callback() {
             @Override
             public void callback(boolean finished, String result) {
                 textArea.setForeground(finished ? Color.GREEN : Color.RED);
                 textArea.setText(beautify(result));
             }
-        }));
+        });
     }
 
     private String beautify(String json) {

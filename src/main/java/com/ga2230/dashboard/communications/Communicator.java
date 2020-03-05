@@ -1,6 +1,8 @@
 package com.ga2230.dashboard.communications;
 
 import com.ga2230.dashboard.graphics.Frame;
+import com.ga2230.dashboard.telemetry.TelemetryParser;
+import org.json.JSONObject;
 
 import javax.swing.*;
 import java.util.ArrayList;
@@ -12,13 +14,12 @@ import java.util.ArrayList;
 
 public class Communicator {
 
-    public static ArrayList<Connection> connections = new ArrayList<>();
+    public static final BroadcastConnection TelemetryConnection = new BroadcastConnection("robot telemetry", 20);
+    public static final Connection ActionConnection = Connection.openConnection(10, Connection.ConnectionType.QueuedExecution);
 
-    private static boolean locked = false;
+    private static final ArrayList<Connection> connections = new ArrayList<>();
 
-    public static void register(Connection connection) {
-        connections.add(connection);
-    }
+    private static boolean popupLock = false;
 
     public static void reconnect() {
         new Thread(() -> {
@@ -31,13 +32,9 @@ public class Communicator {
         }).start();
     }
 
-    public static void unlock() {
-        locked = false;
-    }
-
     public static void disconnected() {
-        if (!locked) {
-            locked = true;
+        if (!popupLock) {
+            popupLock = true;
             if (Frame.getFrame() != null) {
                 int result = JOptionPane.showConfirmDialog(Frame.getFrame(), "Disconnected - Reconnect?", "Connection error", JOptionPane.YES_NO_OPTION);
                 if (result == JOptionPane.YES_OPTION) {
@@ -47,5 +44,13 @@ public class Communicator {
                 }
             }
         }
+    }
+
+    public static void unlock() {
+        popupLock = false;
+    }
+
+    public static void register(Connection connection) {
+        connections.add(connection);
     }
 }

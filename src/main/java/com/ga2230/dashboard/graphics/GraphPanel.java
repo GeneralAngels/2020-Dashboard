@@ -1,7 +1,8 @@
 package com.ga2230.dashboard.graphics;
 
+import com.ga2230.dashboard.communications.Communicator;
 import com.ga2230.dashboard.communications.Connection;
-import com.ga2230.dashboard.telemetry.TelemetryHelper;
+import com.ga2230.dashboard.telemetry.TelemetryParser;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -21,140 +22,88 @@ import java.awt.event.ActionEvent;
 
 public class GraphPanel extends Panel {
 
-    private XYDataset dataset;
-    private XYSeries logSeries, pointSeries, userSeries;
-    private JFreeChart chart;
+    private XYSeries logSeries;
     private ChartPanel chartPanel;
-    private JPanel uiPanel;
-    private JButton clearAll;
-    private JTextField realtimeX, realtimeY;
+    private JPanel UIPanel;
 
-    private TelemetryHelper xHelper, yHelper;
-
-    private String xCoordinates = "robot>time";
-    private String yCoordinates = "robot>time";
-    private String lastX, lastY;
+    private String parsedModule = "robot", parsedValue = "time";
 
     public GraphPanel() {
-        realtimeY = new JTextField(yCoordinates);
-        realtimeX = new JTextField(xCoordinates);
-        clearAll = new JButton("Clear All");
-        realtimeY.getDocument().addDocumentListener(new DocumentListener() {
+        Communicator.TelemetryConnection.register(new Connection.Callback() {
             @Override
-            public void insertUpdate(DocumentEvent e) {
-                yCoordinates = realtimeY.getText();
-                clearChart();
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                yCoordinates = realtimeY.getText();
-                clearChart();
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                yCoordinates = realtimeY.getText();
-                clearChart();
+            public void callback(boolean finished, String result) {
+                if (finished) {
+                    update();
+                }
             }
         });
-        realtimeX.getDocument().addDocumentListener(new DocumentListener() {
+
+        JFreeChart chart = createChart(createDataset());
+        chartPanel = new ChartPanel(chart);
+        chartPanel.setBackground(Color.WHITE);
+
+        UIPanel = new JPanel(new GridLayout(1, 2));
+        JButton clearAll = new JButton("Clear All");
+        JTextField coordinatesField = new JTextField(parsedModule + ">" + parsedValue);
+
+        coordinatesField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
-                xCoordinates = realtimeX.getText();
-                clearChart();
             }
 
             @Override
             public void removeUpdate(DocumentEvent e) {
-                xCoordinates = realtimeX.getText();
-                clearChart();
             }
 
             @Override
             public void changedUpdate(DocumentEvent e) {
-                xCoordinates = realtimeX.getText();
-                clearChart();
+                String[] split = coordinatesField.getText().split(">", 2);
+                if (split.length == 2) {
+                    parsedModule = split[0];
+                    parsedValue = split[1];
+                }
+                clear();
             }
         });
         clearAll.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                clearAll();
+                clear();
             }
         });
-        chart = createChart(createDataset());
-        chartPanel = new ChartPanel(chart);
-        chartPanel.setBackground(Color.white);
-        uiPanel = new JPanel(new GridLayout(1, 2));
-        uiPanel.add(realtimeY);
-        uiPanel.add(clearAll);
-        add(uiPanel);
+
+        UIPanel.add(coordinatesField);
+        UIPanel.add(clearAll);
+
+        add(UIPanel);
         add(chartPanel);
 
         setBackground(Color.ORANGE);
 
-        xHelper = new TelemetryHelper(20);
-        yHelper = new TelemetryHelper(20);
-
-        clearChart();
+        clear();
     }
 
     private void update() {
         try {
-            if (lastX != null &&
-                    lastY != null) {
-                logSeries.add(Double.parseDouble(lastX), Double.parseDouble(lastY));
-            }
+            logSeries.add(TelemetryParser.find("robot", "time"), TelemetryParser.find(parsedModule, parsedValue));
         } catch (Exception ignored) {
         }
     }
 
-    public void clearChart() {
-        if (xCoordinates.split(">").length == 2) {
-            xHelper.configure(xCoordinates.split(">")[0], xCoordinates.split(">")[1], new TelemetryHelper.Callback() {
-                @Override
-                public void callback(String value) {
-                    lastX = value;
-                    GraphPanel.this.update();
-                }
-            });
-        }
-        if (yCoordinates.split(">").length == 2) {
-            yHelper.configure(yCoordinates.split(">")[0], yCoordinates.split(">")[1], new TelemetryHelper.Callback() {
-                @Override
-                public void callback(String value) {
-                    lastY = value;
-                    GraphPanel.this.update();
-                }
-            });
-        }
+    public void clear() {
         logSeries.clear();
-    }
-
-    public void clearAll() {
-        logSeries.clear();
-        pointSeries.clear();
-        userSeries.clear();
     }
 
     private XYDataset createDataset() {
-
-        logSeries = new XYSeries("Data");
-        pointSeries = new XYSeries("Point");
-        userSeries = new XYSeries("User");
         XYSeriesCollection dataset = new XYSeriesCollection();
-        dataset.addSeries(logSeries);
-        dataset.addSeries(pointSeries);
-        dataset.addSeries(userSeries);
-
+        dataset.addSeries(logSeries = new XYSeries("Data"));
         return dataset;
     }
 
     private JFreeChart createChart(XYDataset dataset) {
         JFreeChart chart = ChartFactory.createXYLineChart(
                 null,
-                null,
+                "Time [ms]",
                 null,
                 dataset,
                 PlotOrientation.VERTICAL,
@@ -164,25 +113,13 @@ public class GraphPanel extends Panel {
         );
 
         XYPlot plot = chart.getXYPlot();
-
         XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
         renderer.setSeriesPaint(0, Color.BLUE);
         renderer.setSeriesStroke(0, new BasicStroke(2f));
         renderer.setSeriesShapesVisible(0, false);
-        //
-        renderer.setSeriesPaint(1, Color.RED);
-        renderer.setSeriesShape(1, new Rectangle(7, 7));
-        renderer.setSeriesStroke(1, new BasicStroke(0));
-        renderer.setSeriesShapesVisible(1, true);
-        //
-        renderer.setSeriesPaint(2, Color.GREEN);
-        renderer.setSeriesShape(2, new Rectangle(7, 7));
-        renderer.setSeriesStroke(2, new BasicStroke(0));
-        renderer.setSeriesShapesVisible(2, true);
-//        renderer.setDefaultShapesVisible(false);
 
         plot.setRenderer(renderer);
-        plot.setBackgroundPaint(Color.white);
+        plot.setBackgroundPaint(Color.WHITE);
 
         plot.setRangeGridlinesVisible(true);
         plot.setRangeGridlinePaint(Color.BLACK);
@@ -190,7 +127,6 @@ public class GraphPanel extends Panel {
         plot.setDomainGridlinesVisible(true);
         plot.setDomainGridlinePaint(Color.BLACK);
         return chart;
-
     }
 
     @Override
@@ -201,9 +137,9 @@ public class GraphPanel extends Panel {
         chartPanel.setPreferredSize(dimension);
         chartPanel.setMinimumSize(dimension);
         chartPanel.setMaximumSize(dimension);
-        uiPanel.setPreferredSize(sourceDimention);
-        uiPanel.setMinimumSize(sourceDimention);
-        uiPanel.setMaximumSize(sourceDimention);
+        UIPanel.setPreferredSize(sourceDimention);
+        UIPanel.setMinimumSize(sourceDimention);
+        UIPanel.setMaximumSize(sourceDimention);
         super.setSize(width, height);
     }
 }

@@ -1,5 +1,6 @@
 package com.ga2230.dashboard.configuration;
 
+import com.ga2230.dashboard.graphics.StatusPanel;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONObject;
 
@@ -16,7 +17,7 @@ public class Configuration {
     private JSONObject object;
 
     private int team;
-    private ArrayList<StatusButtonConfiguration> configurations;
+    private ArrayList<StatusPanel.StatusButton.Configuration> configurations;
 
     private Configuration() throws IOException {
         this.object = new JSONObject(IOUtils.toString(CONFIGURATION_URL.openStream(), Charset.defaultCharset()));
@@ -24,7 +25,7 @@ public class Configuration {
         this.configurations = new ArrayList<>();
         for (int index = 0; index < this.object.getJSONArray("buttons").length(); index++) {
             JSONObject object = this.object.getJSONArray("buttons").getJSONObject(index);
-            this.configurations.add(new StatusButtonConfiguration(object.getString("text"), object.getString("state"), object.getString("click")));
+            this.configurations.add(new StatusPanel.StatusButton.Configuration(object.getString("text"), object.getString("state"), object.getString("click")));
         }
     }
 
@@ -40,7 +41,7 @@ public class Configuration {
         return team;
     }
 
-    public ArrayList<StatusButtonConfiguration> getConfigurations() {
+    public ArrayList<StatusPanel.StatusButton.Configuration> getConfigurations() {
         return configurations;
     }
 }

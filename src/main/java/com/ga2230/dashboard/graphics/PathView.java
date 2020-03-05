@@ -1,6 +1,8 @@
 package com.ga2230.dashboard.graphics;
 
+import com.ga2230.dashboard.communications.Communicator;
 import com.ga2230.dashboard.communications.Connection;
+import com.ga2230.dashboard.telemetry.TelemetryParser;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -19,7 +21,7 @@ public class PathView extends Panel {
 
     private int x, y;
 
-    private double cubeX, cubeY, cubeTheta;
+    private double cubeX, cubeY, cubeAngle;
 
 
     public PathView() {
@@ -32,23 +34,22 @@ public class PathView extends Panel {
             }
         }));
 
-        Connection odometryConnection = Connection.openConnection(5, Connection.ConnectionType.PeriodicExecution);
-        odometryConnection.send(new Connection.Command("odometry telemetry", new Connection.Callback() {
+        Communicator.TelemetryConnection.register(new Connection.Callback() {
             @Override
             public void callback(boolean finished, String result) {
-                JSONObject object = new JSONObject(result);
-                cubeX = object.getDouble("x");
-                cubeY = object.getDouble("y");
-                cubeTheta = object.getDouble("theta");
+                cubeX = TelemetryParser.find("odometry", "x");
+                cubeY = TelemetryParser.find("odometry", "y");
+                cubeAngle = TelemetryParser.find("odometry", "angle");
+
                 repaint();
             }
-        }));
+        });
     }
 
     @Override
     public void setSize(int width, int height) {
-        x = width;
-        y = height;
+        this.x = width;
+        this.y = height;
         super.setSize(width, height);
     }
 
@@ -81,7 +82,7 @@ public class PathView extends Panel {
         y += this.y / OFFSET_DIVIDER;
         g.setColor(Color.BLUE);
         Rectangle rectangle = new Rectangle((int) x - ((int) (CUBE_SIZE_M * WORLD_TO_SCREEN) / 2), (int) (this.y - y) - ((int) (CUBE_SIZE_M * WORLD_TO_SCREEN) / 2), (int) (CUBE_SIZE_M * WORLD_TO_SCREEN), (int) (CUBE_SIZE_M * WORLD_TO_SCREEN));
-        g.rotate(Math.toRadians(-cubeTheta), rectangle.x, rectangle.y);
+        g.rotate(Math.toRadians(-cubeAngle), rectangle.x, rectangle.y);
         g.draw(rectangle);
         g.fill(rectangle);
 //        g.drawRect(((int) cubeX) * WORLD_TO_SCREEN, this.y - ((int) (cubeY * WORLD_TO_SCREEN)), (int) (cubeSize * WORLD_TO_SCREEN), (int) (cubeSize * WORLD_TO_SCREEN));

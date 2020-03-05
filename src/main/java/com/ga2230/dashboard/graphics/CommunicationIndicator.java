@@ -1,5 +1,6 @@
-package com.ga2230.dashboard.communications;
+package com.ga2230.dashboard.graphics;
 
+import com.ga2230.dashboard.communications.Connection;
 import com.ga2230.dashboard.graphics.Panel;
 
 import javax.swing.*;

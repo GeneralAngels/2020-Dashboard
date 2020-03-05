@@ -1,6 +1,10 @@
 package com.ga2230.dashboard.graphics;
 
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+import com.ga2230.dashboard.communications.Communicator;
 import com.ga2230.dashboard.communications.Connection;
+import com.ga2230.dashboard.telemetry.TelemetryParser;
 import org.json.JSONObject;
 
 import javax.swing.*;
@@ -8,29 +12,30 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.function.BiConsumer;
 
 public class CSVPanel extends Panel {
 
     boolean record = false;
 
-    private JButton toggle, save, saveAndOpen, clear, bookmark;
+    private JButton toggle, save, saveAndOpen, clear;
 
-    private ArrayList<String> titles = new ArrayList<>();
-    private ArrayList<ArrayList<String>> log = new ArrayList<>();
+    private HashMap<String, ArrayList<String>> log = new HashMap<>();
 
-    private JSONObject full = new JSONObject();
+    private long index = 0;
 
     public CSVPanel() {
         toggle = new JButton("Record");
         save = new JButton("Save");
         saveAndOpen = new JButton("Save and Open");
         clear = new JButton("Clear");
-        bookmark = new JButton("Add Marker");
         save.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -49,16 +54,9 @@ public class CSVPanel extends Panel {
                 }
             }
         });
-        bookmark.addActionListener(new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                log.add(new ArrayList<>(Collections.singletonList(JOptionPane.showInputDialog("Bookmark Name"))));
-            }
-        });
         clear.addActionListener(new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                titles.clear();
                 log.clear();
             }
         });
@@ -76,27 +74,40 @@ public class CSVPanel extends Panel {
         add(toggle);
         add(save);
         add(saveAndOpen);
-        add(bookmark);
         add(clear);
         setLayout(new GridLayout(1, 4));
 
-        Connection telemetryConnection = Connection.openConnection(20, Connection.ConnectionType.PeriodicExecution);
-        telemetryConnection.send(new Connection.Command("robot telemetry", new Connection.Callback() {
+        Communicator.TelemetryConnection.register(new Connection.Callback() {
             @Override
             public void callback(boolean finished, String result) {
-                try {
-                    full = new JSONObject(result);
-                    CSVPanel.this.update();
-                } catch (Exception ignored) {
+                if (record) {
+                    update(TelemetryParser.get(), "robot");
+                    index++;
                 }
             }
-        }));
+        });
     }
 
-    private void update() {
-        if (record) {
-            titles = flatten(full, true);
-            log.add(flatten(full, false));
+    private void update(JSONObject object, String title) {
+        for (String key : object.keySet()) {
+            Object current = object.get(key);
+            if (current instanceof JSONObject) {
+                update((JSONObject) current, key);
+            } else {
+                String columnName = title + ">" + key;
+                ArrayList<String> currentColumn = log.get(columnName);
+                // Make sure its not null
+                if (currentColumn == null) {
+                    currentColumn = new ArrayList<>();
+                }
+                for (long i = currentColumn.size(); i < index; i++) {
+                    currentColumn.add(null);
+                }
+                // Add another one
+                currentColumn.add((String) current);
+                // Set
+                log.put(columnName, currentColumn);
+            }
         }
     }
 
@@ -108,19 +119,21 @@ public class CSVPanel extends Panel {
                 File logFile = new File(directory, date + ".csv");
                 if (logFile.createNewFile()) {
                     OutputStreamWriter outputStreamWriter = new OutputStreamWriter(new FileOutputStream(logFile));
-                    ArrayList<ArrayList<String>> logData = new ArrayList<>();
-                    logData.add(titles);
-                    logData.addAll(log);
-                    for (ArrayList<String> line : logData) {
-                        String lineString = "";
-                        for (String cell : line) {
-                            if (lineString.length() > 0) {
-                                lineString += ",";
+                    outputStreamWriter.append(String.join(",", log.keySet())).append("\n");
+                    for (int i = 1; i < index; i++) {
+                        int j = i;
+                        log.forEach((s, strings) -> {
+                            try {
+                                if (strings.size() > j) {
+                                    outputStreamWriter.append(strings.get(j - 1));
+                                }
+                                outputStreamWriter.append(",");
+                            } catch (IOException ignored) {
                             }
-                            lineString += cell;
-                        }
-                        outputStreamWriter.append(lineString).append("\n");
+                        });
+                        outputStreamWriter.append("\n");
                     }
+                    outputStreamWriter.flush();
                     outputStreamWriter.close();
                     return logFile;
                 }
