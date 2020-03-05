@@ -8,17 +8,17 @@ public class StatusHelper {
     private Connection connection;
 
     public StatusHelper(double refreshRate) {
-        connection = Connection.openConnection(refreshRate, false);
+        connection = Connection.openConnection(refreshRate, Connection.ConnectionType.PeriodicExecution);
     }
 
     public void configure(String function, StatusHelper.Callback callback) {
         connection.clear();
-        connection.send(function, new Connection.Callback() {
+        connection.send(new Connection.Command(function, new Connection.Callback() {
             @Override
             public void callback(boolean finished, String result) {
                 callback.callback(finished);
             }
-        });
+        }));
     }
 
     public interface Callback {

@@ -8,12 +8,12 @@ public class TelemetryHelper {
     private Connection connection;
 
     public TelemetryHelper(double refreshRate) {
-        connection = Connection.openConnection(refreshRate, false);
+        connection = Connection.openConnection(refreshRate, Connection.ConnectionType.PeriodicExecution);
     }
 
     public void configure(String module, String value, Callback callback) {
         connection.clear();
-        connection.send(module + " telemetry", new Connection.Callback() {
+        connection.send(new Connection.Command(module + " telemetry", new Connection.Callback() {
             @Override
             public void callback(boolean finished, String result) {
                 if (finished) {
@@ -25,7 +25,7 @@ public class TelemetryHelper {
                 }
                 callback.callback("");
             }
-        });
+        }));
     }
 
     public interface Callback {

@@ -80,8 +80,8 @@ public class CSVPanel extends Panel {
         add(clear);
         setLayout(new GridLayout(1, 4));
 
-        Connection telemetryConnection = Connection.openConnection(20, false);
-        telemetryConnection.send("robot telemetry", new Connection.Callback() {
+        Connection telemetryConnection = Connection.openConnection(20, Connection.ConnectionType.PeriodicExecution);
+        telemetryConnection.send(new Connection.Command("robot telemetry", new Connection.Callback() {
             @Override
             public void callback(boolean finished, String result) {
                 try {
@@ -90,7 +90,7 @@ public class CSVPanel extends Panel {
                 } catch (Exception ignored) {
                 }
             }
-        });
+        }));
     }
 
     private void update() {

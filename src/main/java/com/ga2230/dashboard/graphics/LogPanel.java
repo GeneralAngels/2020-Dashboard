@@ -22,14 +22,14 @@ public class LogPanel extends Panel {
         setBackground(Color.BLACK);
         add(scrollPane);
 
-        Connection telemetryConnection = Connection.openConnection( 5, false);
-        telemetryConnection.send("robot telemetry", new Connection.Callback() {
+        Connection telemetryConnection = Connection.openConnection(5, Connection.ConnectionType.PeriodicExecution);
+        telemetryConnection.send(new Connection.Command("robot telemetry", new Connection.Callback() {
             @Override
             public void callback(boolean finished, String result) {
                 textArea.setForeground(finished ? Color.GREEN : Color.RED);
                 textArea.setText(beautify(result));
             }
-        });
+        }));
     }
 
     private String beautify(String json) {

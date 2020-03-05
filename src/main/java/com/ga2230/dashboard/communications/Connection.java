@@ -1,6 +1,7 @@
 package com.ga2230.dashboard.communications;
 
 import com.ga2230.dashboard.configuration.Configuration;
+import jdk.vm.ci.code.site.Call;
 
 import java.io.*;
 import java.net.InetSocketAddress;
@@ -14,9 +15,11 @@ public class Connection {
 
     private static final int PORT = 5800;
 
+    private ConnectionType connectionType = ConnectionType.QueuedExecution;
+
     // Pending command queue
-    private Queue<String> commandQueue;
-    private Queue<Callback> callbackQueue;
+    private Queue<Command> commandQueue;
+    private Command currentCommand;
 
     // I/O section
     private BufferedWriter writer;
@@ -25,19 +28,17 @@ public class Connection {
 
     private boolean connected = false;
 
-    private boolean loop = true;
-    private boolean queue = true;
     private double refreshRate;
     private int teamNumber;
 
     private Timer timer;
 
-    public Connection(int teamNumber, double refreshRate, boolean queue) {
+    public Connection(int teamNumber, double refreshRate, ConnectionType connectionType) {
+        this.connectionType = connectionType;
         this.commandQueue = new ArrayDeque<>();
-        this.callbackQueue = new ArrayDeque<>();
+        this.currentCommand = null;
         this.teamNumber = teamNumber;
         this.refreshRate = refreshRate;
-        this.queue = queue;
 
         this.timer = new Timer();
 
@@ -48,8 +49,8 @@ public class Connection {
         Communicator.register(this);
     }
 
-    public static Connection openConnection(double refreshRate, boolean queue) {
-        Connection connection = new Connection(Configuration.load().getTeam(), refreshRate, queue);
+    public static Connection openConnection(double refreshRate, ConnectionType connectionType) {
+        Connection connection = new Connection(Configuration.load().getTeam(), refreshRate, connectionType);
         connection.open();
         return connection;
     }
@@ -57,7 +58,6 @@ public class Connection {
     public boolean open() {
         try {
             connected = false;
-            prepare();
             connect();
             connected = true;
         } catch (IOException e) {
@@ -70,6 +70,18 @@ public class Connection {
     public void close() throws IOException {
         connected = false;
         socket.close();
+    }
+
+    public void clear() {
+        commandQueue.clear();
+        currentCommand = null;
+    }
+
+    public void send(Command command) {
+        if (connectionType == ConnectionType.QueuedExecution)
+            commandQueue.add(command);
+        else
+            currentCommand = command;
     }
 
     private void connect() throws IOException {
@@ -86,9 +98,9 @@ public class Connection {
         if (refreshRate > 0) {
             try {
                 timer.cancel();
-                timer = new Timer();
             } catch (Exception ignored) {
             } finally {
+                timer = new Timer();
                 timer.scheduleAtFixedRate(new TimerTask() {
                     @Override
                     public void run() {
@@ -104,48 +116,30 @@ public class Connection {
         }
     }
 
-    public void clear() {
-        commandQueue.clear();
-        callbackQueue.clear();
-        // Change loop
-        prepare();
-    }
-
-    public void prepare() {
-        // Change loop
-        loop = true;
-    }
-
-    public void send(String command, Callback callback) {
-        commandQueue.add(command);
-        callbackQueue.add(callback);
+    private void next() {
+        if (connectionType == ConnectionType.QueuedExecution)
+            currentCommand = commandQueue.remove();
     }
 
     private void loop() throws IOException {
         if (connected) {
-            if (!commandQueue.isEmpty() || !callbackQueue.isEmpty()) {
-                if (loop) {
-                    writer.write(commandQueue.peek());
-                    writer.newLine();
-                    writer.flush();
-                    // Pop
-                    if (this.queue)
-                        commandQueue.remove();
-                } else {
-                    // Read result
-                    String result = reader.readLine();
-                    // Split result
-                    String[] split = result.split(":", 2);
-                    // Call callback
-                    Callback callback = callbackQueue.peek();
-                    if (callback != null && split.length == 2)
-                        callback.callback(Boolean.parseBoolean(split[0]), split[1]);
-                    // Pop
-                    if (this.queue)
-                        callbackQueue.remove();
+            next();
+            if (currentCommand != null) {
+                // Write command
+                writer.write(currentCommand.getFunction());
+                writer.newLine();
+                writer.flush();
+                // Wait for result
+                // Parse result
+                String result = reader.readLine();
+                String[] resultSplit = result.split(":", 2);
+                // Make sure we have all of the results
+                if (resultSplit.length == 2) {
+                    // Make sure callback is not null
+                    if (currentCommand.getCallback() != null) {
+                        currentCommand.getCallback().callback(Boolean.parseBoolean(resultSplit[0]), resultSplit[1]);
+                    }
                 }
-                // Switch handler
-                loop = !loop;
             }
         }
     }
@@ -154,7 +148,30 @@ public class Connection {
         return connected;
     }
 
+    public enum ConnectionType {
+        QueuedExecution,
+        PeriodicExecution
+    }
+
     public interface Callback {
         void callback(boolean finished, String result);
+    }
+
+    public static class Command {
+        private String function;
+        private Callback callback;
+
+        public Command(String function, Callback callback) {
+            this.function = function;
+            this.callback = callback;
+        }
+
+        public String getFunction() {
+            return function;
+        }
+
+        public Callback getCallback() {
+            return callback;
+        }
     }
 }

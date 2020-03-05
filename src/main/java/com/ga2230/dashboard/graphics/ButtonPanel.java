@@ -21,7 +21,7 @@ public class ButtonPanel extends Panel {
 
     public ButtonPanel() {
 
-        connection = Connection.openConnection(1, true);
+        connection = Connection.openConnection(1, Connection.ConnectionType.QueuedExecution);
 
         autonomousButton = new JButton("Upload new autonomous");
         autonomousButton.addActionListener(new AbstractAction() {
@@ -50,12 +50,12 @@ public class ButtonPanel extends Panel {
                         String command = "runtime load " + builder.toString();
                         String base64 = new String(Base64.getEncoder().encode(command.getBytes()));
                         // Upload the file
-                        connection.send("base64:" + base64, new Connection.Callback() {
+                        connection.send(new Connection.Command("base64:" + base64, new Connection.Callback() {
                             @Override
                             public void callback(boolean finished, String result) {
                                 setStatus(finished, new String(Base64.getDecoder().decode(result.getBytes())));
                             }
-                        });
+                        }));
                     } catch (IOException e) {
                         setStatus(false, e.toString());
                     }

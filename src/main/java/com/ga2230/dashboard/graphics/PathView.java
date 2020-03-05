@@ -23,17 +23,17 @@ public class PathView extends Panel {
 
 
     public PathView() {
-        Connection pathConnection = Connection.openConnection(2, false);
-        pathConnection.send("path fetch", new Connection.Callback() {
+        Connection pathConnection = Connection.openConnection(2, Connection.ConnectionType.PeriodicExecution);
+        pathConnection.send(new Connection.Command("path fetch", new Connection.Callback() {
             @Override
             public void callback(boolean finished, String result) {
                 array = new JSONArray(result);
                 repaint();
             }
-        });
+        }));
 
-        Connection odometryConnection = Connection.openConnection(5, false);
-        odometryConnection.send("odometry telemetry", new Connection.Callback() {
+        Connection odometryConnection = Connection.openConnection(5, Connection.ConnectionType.PeriodicExecution);
+        odometryConnection.send(new Connection.Command("odometry telemetry", new Connection.Callback() {
             @Override
             public void callback(boolean finished, String result) {
                 JSONObject object = new JSONObject(result);
@@ -42,7 +42,7 @@ public class PathView extends Panel {
                 cubeTheta = object.getDouble("theta");
                 repaint();
             }
-        });
+        }));
     }
 
     @Override

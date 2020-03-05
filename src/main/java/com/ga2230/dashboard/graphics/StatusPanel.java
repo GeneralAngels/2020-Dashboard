@@ -25,7 +25,7 @@ public class StatusPanel extends Panel {
 
     public StatusPanel() {
 
-        actionConnection = Connection.openConnection(20, true);
+        actionConnection = Connection.openConnection(20, Connection.ConnectionType.QueuedExecution);
 
         buttons = new ArrayList<>();
 
@@ -92,12 +92,12 @@ public class StatusPanel extends Panel {
 
         public void queueAction() {
             if (!configuration.getClickFunction().equals("")) {
-                actionConnection.send(configuration.getClickFunction(), new Connection.Callback() {
+                actionConnection.send(new Connection.Command(configuration.getClickFunction(), new Connection.Callback() {
                     @Override
                     public void callback(boolean finished, String result) {
                         JOptionPane.showMessageDialog(Frame.getFrame(), result, "Result", finished ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.ERROR_MESSAGE);
                     }
-                });
+                }));
             }
         }
 
