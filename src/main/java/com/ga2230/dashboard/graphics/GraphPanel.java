@@ -49,14 +49,20 @@ public class GraphPanel extends Panel {
         coordinatesField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
+                update();
             }
 
             @Override
             public void removeUpdate(DocumentEvent e) {
+                update();
             }
 
             @Override
             public void changedUpdate(DocumentEvent e) {
+                update();
+            }
+
+            private void update() {
                 String[] split = coordinatesField.getText().split(">", 2);
                 if (split.length == 2) {
                     parsedModule = split[0];
@@ -85,7 +91,7 @@ public class GraphPanel extends Panel {
 
     private void update() {
         try {
-            logSeries.add(TelemetryParser.find("robot", "time"), TelemetryParser.find(parsedModule, parsedValue));
+            logSeries.add(TelemetryParser.findDouble("robot", "time"), TelemetryParser.findDouble(parsedModule, parsedValue));
         } catch (Exception ignored) {
         }
     }
@@ -103,7 +109,7 @@ public class GraphPanel extends Panel {
     private JFreeChart createChart(XYDataset dataset) {
         JFreeChart chart = ChartFactory.createXYLineChart(
                 null,
-                "Time [ms]",
+                null,
                 null,
                 dataset,
                 PlotOrientation.VERTICAL,

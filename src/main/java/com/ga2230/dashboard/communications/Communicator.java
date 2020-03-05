@@ -12,12 +12,22 @@ import java.util.ArrayList;
  * https://github.com/GeneralAngels/RIO20
  */
 
-public class Communicator {
+public abstract class Communicator {
+
+    private static final ArrayList<Connection> connections = new ArrayList<>();
 
     public static final BroadcastConnection TelemetryConnection = new BroadcastConnection("robot telemetry", 20);
     public static final Connection ActionConnection = Connection.openConnection(10, Connection.ConnectionType.QueuedExecution);
 
-    private static final ArrayList<Connection> connections = new ArrayList<>();
+    static {
+        Communicator.TelemetryConnection.register(new Connection.Callback() {
+            @Override
+            public void callback(boolean finished, String result) {
+                TelemetryParser.update(new JSONObject(result));
+            }
+        });
+    }
+
 
     private static boolean popupLock = false;
 

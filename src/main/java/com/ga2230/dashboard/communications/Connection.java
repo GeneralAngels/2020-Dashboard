@@ -117,8 +117,13 @@ public class Connection {
     }
 
     private void next() {
-        if (connectionType == ConnectionType.QueuedExecution)
-            currentCommand = commandQueue.remove();
+        if (connectionType == ConnectionType.QueuedExecution) {
+            if (!commandQueue.isEmpty()) {
+                currentCommand = commandQueue.remove();
+            } else {
+                currentCommand = null;
+            }
+        }
     }
 
     private void loop() throws IOException {

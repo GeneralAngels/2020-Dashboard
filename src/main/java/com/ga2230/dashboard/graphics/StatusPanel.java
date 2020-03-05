@@ -2,8 +2,6 @@ package com.ga2230.dashboard.graphics;
 
 import com.ga2230.dashboard.communications.Communicator;
 import com.ga2230.dashboard.communications.Connection;
-import com.ga2230.dashboard.telemetry.StatusHelper;
-import com.ga2230.dashboard.telemetry.TelemetryHelper;
 import com.ga2230.dashboard.telemetry.TelemetryParser;
 
 import javax.swing.*;
@@ -60,23 +58,15 @@ public class StatusPanel extends Panel {
 
         public void prepareUpdater() {
             if (configuration.getStateFunction().length() > 0) {
-                if (!configuration.getStateFunction().contains(">")) {
-                    StatusHelper helper = new StatusHelper(2);
-                    helper.configure(configuration.getStateFunction(), new StatusHelper.Callback() {
-                        @Override
-                        public void callback(boolean value) {
-                            setBackground(value ? Color.GREEN : Color.RED);
-                        }
-                    });
-                } else {
-                    String[] moduleKey = configuration.getStateFunction().split(">", 2);
-                    String[] keyValue = moduleKey[1].split("<", 2);
-                    Communicator.TelemetryConnection.register(new Connection.Callback() {
-                        @Override
-                        public void callback(boolean finished, String result) {
-                        }
-                    });
-                }
+                String[] moduleKey = configuration.getStateFunction().split(">", 2);
+                String[] keyValue = moduleKey[1].split("<", 2);
+                Communicator.TelemetryConnection.register(new Connection.Callback() {
+                    @Override
+                    public void callback(boolean finished, String result) {
+                        boolean success = TelemetryParser.findString(moduleKey[0], moduleKey[1]).equals(keyValue[1]);
+                        setBackground(success ? Color.GREEN : Color.RED);
+                    }
+                });
             }
         }
 

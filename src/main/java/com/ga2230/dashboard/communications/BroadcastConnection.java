@@ -1,6 +1,7 @@
 package com.ga2230.dashboard.communications;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 public class BroadcastConnection {
 
@@ -14,8 +15,9 @@ public class BroadcastConnection {
         connection.send(new Connection.Command(command, new Connection.Callback() {
             @Override
             public void callback(boolean finished, String result) {
-                for (Connection.Callback callback : callbacks)
-                    callback.callback(finished, result);
+                Iterator<Connection.Callback> callbackIterator = callbacks.iterator();
+                while (callbackIterator.hasNext())
+                    callbackIterator.next().callback(finished, result);
             }
         }));
     }

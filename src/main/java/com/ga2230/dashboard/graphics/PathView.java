@@ -37,9 +37,9 @@ public class PathView extends Panel {
         Communicator.TelemetryConnection.register(new Connection.Callback() {
             @Override
             public void callback(boolean finished, String result) {
-                cubeX = TelemetryParser.find("odometry", "x");
-                cubeY = TelemetryParser.find("odometry", "y");
-                cubeAngle = TelemetryParser.find("odometry", "angle");
+                cubeX = TelemetryParser.findDouble("odometry", "x");
+                cubeY = TelemetryParser.findDouble("odometry", "y");
+                cubeAngle = TelemetryParser.findDouble("odometry", "theta");
 
                 repaint();
             }
