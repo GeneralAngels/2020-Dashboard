@@ -2,6 +2,7 @@ package com.ga2230.dashboard.graphics;
 
 import com.ga2230.dashboard.communications.Communicator;
 import com.ga2230.dashboard.communications.Connection;
+import com.ga2230.dashboard.communications.Global;
 import com.ga2230.dashboard.telemetry.TelemetryParser;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -29,7 +30,7 @@ public class GraphPanel extends Panel {
     private String parsedModule = "robot", parsedValue = "time";
 
     public GraphPanel() {
-        Communicator.TelemetryConnection.register(new Connection.Callback() {
+        Global.TelemetryConnection.register(new Connection.Callback() {
             @Override
             public void callback(boolean finished, String result) {
                 if (finished) {

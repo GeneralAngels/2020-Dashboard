@@ -30,11 +30,16 @@ task fatJar(type: Jar) {
 }
 
 dependencies {
-    compile group: 'commons-io', name: 'commons-io', version: '2.6'
+
     compile group: 'org.json', name: 'json', version: '20190722'
+    compile group: 'com.ga2230', name: 'dashboard', version: '2020.0.4'
+
+    compile group: 'commons-io', name: 'commons-io', version: '2.6'
+
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.6.1'
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.6.1'
     compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-csv', version: '2.7.0'
+
     compile group: 'org.jfree', name: 'jfreechart', version: '1.5.0'
     compile group: 'net.sf.jipcam', name: 'jipcam', version: '0.9.1'
 

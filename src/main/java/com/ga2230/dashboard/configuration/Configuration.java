@@ -7,41 +7,35 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
 import java.util.ArrayList;
 
-public class Configuration {
+public abstract class Configuration {
 
     private static final URL CONFIGURATION_URL = Configuration.class.getClassLoader().getResource("configuration.json");
 
-    private JSONObject object;
+    private static JSONObject object;
 
-    private int team;
-    private ArrayList<StatusPanel.StatusButton.Configuration> configurations;
+    private static int teamNumber;
+    private static ArrayList<StatusPanel.StatusButton.Configuration> configurations;
 
-    private Configuration() throws IOException {
-        this.object = new JSONObject(IOUtils.toString(CONFIGURATION_URL.openStream(), Charset.defaultCharset()));
-        this.team = object.getInt("team");
-        this.configurations = new ArrayList<>();
-        for (int index = 0; index < this.object.getJSONArray("buttons").length(); index++) {
-            JSONObject object = this.object.getJSONArray("buttons").getJSONObject(index);
-            this.configurations.add(new StatusPanel.StatusButton.Configuration(object.getString("text"), object.getString("state"), object.getString("click")));
-        }
-    }
-
-    public static Configuration load() {
+    public static void initialize() {
         try {
-            return new Configuration();
+            Configuration.object = new JSONObject(IOUtils.toString(CONFIGURATION_URL.openStream(), Charset.defaultCharset()));
+            Configuration.teamNumber = object.getInt("team");
+            Configuration.configurations = new ArrayList<>();
+            for (int index = 0; index < Configuration.object.getJSONArray("buttons").length(); index++) {
+                JSONObject object = Configuration.object.getJSONArray("buttons").getJSONObject(index);
+                Configuration.configurations.add(new StatusPanel.StatusButton.Configuration(object.getString("text"), object.getString("state"), object.getString("click")));
+            }
         } catch (IOException e) {
-            return null;
         }
     }
 
-    public int getTeam() {
-        return team;
+    public static int getTeamNumber() {
+        return teamNumber;
     }
 
-    public ArrayList<StatusPanel.StatusButton.Configuration> getConfigurations() {
+    public static ArrayList<StatusPanel.StatusButton.Configuration> getConfigurations() {
         return configurations;
     }
 }

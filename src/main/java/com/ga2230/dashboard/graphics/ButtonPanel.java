@@ -1,64 +1,19 @@
 package com.ga2230.dashboard.graphics;
 
 import com.ga2230.dashboard.communications.Communicator;
-import com.ga2230.dashboard.communications.Connection;
+import com.ga2230.dashboard.communications.Global;
+import com.ga2230.dashboard.configuration.Configuration;
 
 import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.Base64;
-import java.util.List;
 
 public class ButtonPanel extends Panel {
 
     private JButton autonomousButton, reconnectButton;
 
     public ButtonPanel() {
-        autonomousButton = new JButton("Upload new autonomous");
-        autonomousButton.addActionListener(new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent a) {
-                // Choose a file
-                JFileChooser chooser = new JFileChooser();
-                chooser.setFileFilter(new FileNameExtensionFilter("Shleam Script", "shleam", "2230"));
-                chooser.setDialogType(JFileChooser.FILES_ONLY);
-                chooser.showDialog(Frame.getFrame(), "Upload");
-                // Make sure chosen file isn't null
-                File file = chooser.getSelectedFile();
-                if (file != null) {
-                    // Try reading the file
-                    try {
-                        // Read the file
-                        List<String> strings = Files.readAllLines(file.toPath());
-                        // Rebuild the file
-                        StringBuilder builder = new StringBuilder();
-                        for (String s : strings) {
-                            if (builder.length() > 0)
-                                builder.append("\n");
-                            builder.append(s);
-                        }
-                        // Encode the file
-                        String command = "runtime load " + builder.toString();
-                        String base64 = new String(Base64.getEncoder().encode(command.getBytes()));
-                        // Upload the file
-                        Communicator.ActionConnection.send(new Connection.Command("base64:" + base64, new Connection.Callback() {
-                            @Override
-                            public void callback(boolean finished, String result) {
-                                setStatus(finished, new String(Base64.getDecoder().decode(result.getBytes())));
-                            }
-                        }));
-                    } catch (IOException e) {
-                        setStatus(false, e.toString());
-                    }
-                } else {
-                    setStatus(false, "You must choose a file");
-                }
-            }
-        });
+        autonomousButton = new JScriptButton(Global.ActionConnection, Configuration.getTeamNumber(), Frame.getInstance());
         reconnectButton = new JButton("Reconnect");
         reconnectButton.addActionListener(new AbstractAction() {
             @Override
@@ -68,11 +23,11 @@ public class ButtonPanel extends Panel {
         });
         setLayout(new GridLayout(1, 3));
         add(reconnectButton);
-        add(new IndicatorPanel());
+        add(new JIndicator(Global.TelemetryConnection));
         add(autonomousButton);
     }
 
     private void setStatus(boolean finished, String message) {
-        JOptionPane.showMessageDialog(Frame.getFrame(), message, finished ? "Status report" : "Error report", finished ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(Frame.getInstance(), message, finished ? "Status report" : "Error report", finished ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.ERROR_MESSAGE);
     }
 }

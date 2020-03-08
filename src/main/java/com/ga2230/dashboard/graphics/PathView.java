@@ -2,6 +2,7 @@ package com.ga2230.dashboard.graphics;
 
 import com.ga2230.dashboard.communications.Communicator;
 import com.ga2230.dashboard.communications.Connection;
+import com.ga2230.dashboard.communications.Global;
 import com.ga2230.dashboard.telemetry.TelemetryParser;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -25,7 +26,7 @@ public class PathView extends Panel {
 
 
     public PathView() {
-        Connection pathConnection = Connection.openConnection(2, Connection.ConnectionType.PeriodicExecution);
+        Connection pathConnection = Communicator.openConnection(2, Connection.ConnectionType.PeriodicExecution);
         pathConnection.send(new Connection.Command("path fetch", new Connection.Callback() {
             @Override
             public void callback(boolean finished, String result) {
@@ -34,7 +35,7 @@ public class PathView extends Panel {
             }
         }));
 
-        Communicator.TelemetryConnection.register(new Connection.Callback() {
+        Global.TelemetryConnection.register(new Connection.Callback() {
             @Override
             public void callback(boolean finished, String result) {
                 cubeX = TelemetryParser.findDouble("odometry", "x");

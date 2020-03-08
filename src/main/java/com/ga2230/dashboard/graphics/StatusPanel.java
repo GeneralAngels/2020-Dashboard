@@ -1,7 +1,8 @@
 package com.ga2230.dashboard.graphics;
 
-import com.ga2230.dashboard.communications.Communicator;
 import com.ga2230.dashboard.communications.Connection;
+import com.ga2230.dashboard.communications.Global;
+import com.ga2230.dashboard.configuration.Configuration;
 import com.ga2230.dashboard.telemetry.TelemetryParser;
 
 import javax.swing.*;
@@ -19,7 +20,7 @@ public class StatusPanel extends Panel {
 
         buttons = new ArrayList<>();
 
-        ArrayList<StatusButton.Configuration> configurations = com.ga2230.dashboard.configuration.Configuration.load().getConfigurations();
+        ArrayList<StatusButton.Configuration> configurations = Configuration.getConfigurations();
 
         // Actual brain
         // setLayout(new GridLayout((configurations.size() + configurations.size() % 2) / 2, 2));
@@ -60,7 +61,7 @@ public class StatusPanel extends Panel {
             if (configuration.getStateFunction().length() > 0) {
                 String[] moduleKey = configuration.getStateFunction().split(">", 2);
                 String[] keyValue = moduleKey[1].split("<", 2);
-                Communicator.TelemetryConnection.register(new Connection.Callback() {
+                Global.TelemetryConnection.register(new Connection.Callback() {
                     @Override
                     public void callback(boolean finished, String result) {
                         boolean success = TelemetryParser.findString(moduleKey[0], moduleKey[1]).equals(keyValue[1]);
@@ -72,7 +73,7 @@ public class StatusPanel extends Panel {
 
         public void queueAction() {
             if (!configuration.getClickFunction().equals("")) {
-                Communicator.ActionConnection.send(new Connection.Command(configuration.getClickFunction(), (finished, result) -> JOptionPane.showMessageDialog(Frame.getFrame(), result, "Result", finished ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.ERROR_MESSAGE)));
+                Global.ActionConnection.send(new Connection.Command(configuration.getClickFunction(), (finished, result) -> JOptionPane.showMessageDialog(Frame.getInstance(), result, "Result", finished ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.ERROR_MESSAGE)));
             }
         }
 

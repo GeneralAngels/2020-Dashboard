@@ -4,6 +4,7 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.ga2230.dashboard.communications.Communicator;
 import com.ga2230.dashboard.communications.Connection;
+import com.ga2230.dashboard.communications.Global;
 import com.ga2230.dashboard.telemetry.TelemetryParser;
 import org.json.JSONObject;
 
@@ -77,7 +78,7 @@ public class CSVPanel extends Panel {
         add(clear);
         setLayout(new GridLayout(1, 4));
 
-        Communicator.TelemetryConnection.register(new Connection.Callback() {
+        Global.TelemetryConnection.register(new Connection.Callback() {
             @Override
             public void callback(boolean finished, String result) {
                 if (record) {

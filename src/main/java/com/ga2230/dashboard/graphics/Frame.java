@@ -1,16 +1,10 @@
 package com.ga2230.dashboard.graphics;
 
-import javafx.scene.layout.Pane;
+import com.ga2230.dashboard.communications.Communicator;
 
 import javax.swing.*;
 
-public class Frame extends JFrame {
-
-    private static Frame instance;
-
-    public static Frame getFrame() {
-        return instance;
-    }
+public abstract class Frame {
 
     private static final int WINDOW_HEIGHT = 528;
     private static final int WINDOW_WIDTH = 1366;
@@ -18,40 +12,42 @@ public class Frame extends JFrame {
     private static final int INNER_PANE_WIDTH = (WINDOW_WIDTH / 2) - 8;
     private static final int INNER_PANE_HEIGHT = (WINDOW_HEIGHT);
 
-    static final int FONT_SIZE = 25;
+    private static JFrame frame;
 
-    private JPanel panel;
+    private static JPanel panel;
 
-    private JTabbedPane analyticsSwitcher, liveSwitcher;
+    private static JTabbedPane analyticsSwitcher, liveSwitcher;
 
-    public Frame() {
-        this.loadPanel();
-        this.loadLive();
-        this.loadAnalytics();
+    public static JFrame getInstance() {
+        return frame;
     }
 
-    public void display(){
-        setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
-        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        setUndecorated(true);
-        setVisible(true);
-        instance = this;
+    public static void initialize() {
+        frame = new JFrame();
+        loadPanel();
+        loadLive();
+        loadAnalytics();
+        frame.setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        frame.setUndecorated(true);
+        frame.setVisible(true);
+        Communicator.setFrame(frame);
     }
 
-    private void loadPanel() {
+    private static void loadPanel() {
         panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
-        setContentPane(panel);
+        frame.setContentPane(panel);
     }
 
-    private void loadLive() {
+    private static void loadLive() {
         liveSwitcher = new JTabbedPane();
-        this.loadStream();
-        this.loadPath();
+        loadStream();
+        loadPath();
         panel.add(liveSwitcher);
     }
 
-    private void loadStream() {
+    private static void loadStream() {
         StreamView stream = new StreamView();
         // Size
         stream.setSize(INNER_PANE_WIDTH, INNER_PANE_HEIGHT);
@@ -60,22 +56,22 @@ public class Frame extends JFrame {
         //stream.play();
     }
 
-    private void loadPath() {
+    private static void loadPath() {
         PathView pathView = new PathView();
         // Size
         pathView.setSize(INNER_PANE_WIDTH, INNER_PANE_HEIGHT);
         // Add tab
-        liveSwitcher.add("Trajectory", pathView);
+        liveSwitcher.add("Path", pathView);
     }
 
-    private void loadAnalytics() {
+    private static void loadAnalytics() {
         analyticsSwitcher = new JTabbedPane();
-        this.loadSimplified();
-        this.loadAdvanced();
+        loadSimplified();
+        loadAdvanced();
         panel.add(analyticsSwitcher);
     }
 
-    private void loadAdvanced() {
+    private static void loadAdvanced() {
         Panel advanced = new Panel();
         advanced.setLayout(new BoxLayout(advanced, BoxLayout.Y_AXIS));
         // Load csv
@@ -96,7 +92,7 @@ public class Frame extends JFrame {
         analyticsSwitcher.add("Advanced", advanced);
     }
 
-    private void loadSimplified() {
+    private static void loadSimplified() {
         Panel simpilfied = new Panel();
         simpilfied.setLayout(new BoxLayout(simpilfied, BoxLayout.Y_AXIS));
         // Status panel

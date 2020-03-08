@@ -1,5 +1,7 @@
 package com.ga2230.dashboard;
 
+import com.ga2230.dashboard.communications.Communicator;
+import com.ga2230.dashboard.configuration.Configuration;
 import com.ga2230.dashboard.graphics.Frame;
 
 import javax.swing.*;
@@ -7,13 +9,14 @@ import javax.swing.*;
 public class Main {
 
     public static void main(String[] args) {
-        loadLicense();
         loadTheme();
+        loadConfiguration();
         loadFrame();
     }
 
-    private static void loadLicense() {
-        System.setProperty("jxbrowser.license.key", "1BNDHFSC1FTIQN062EJO3ZSIX528RTPMK6L9V7HHKN6KRWKQDLC7D9FP6NC2BWEP6QMTCU");
+    private static void loadConfiguration() {
+        Configuration.initialize();
+        Communicator.setTeamNumber(Configuration.getTeamNumber());
     }
 
     private static void loadTheme() {
@@ -25,8 +28,7 @@ public class Main {
     }
 
     private static void loadFrame() {
-        Frame frame = new Frame();
-        frame.display();
+        Frame.initialize();
     }
 
 }
