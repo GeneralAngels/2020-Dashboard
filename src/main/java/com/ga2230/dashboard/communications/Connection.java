@@ -1,8 +1,5 @@
 package com.ga2230.dashboard.communications;
 
-import com.ga2230.dashboard.configuration.Configuration;
-import jdk.vm.ci.code.site.Call;
-
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -47,12 +44,6 @@ public class Connection {
 
         // Add to communicator
         Communicator.register(this);
-    }
-
-    public static Connection openConnection(double refreshRate, ConnectionType connectionType) {
-        Connection connection = new Connection(Configuration.load().getTeam(), refreshRate, connectionType);
-        connection.open();
-        return connection;
     }
 
     public boolean open() {
